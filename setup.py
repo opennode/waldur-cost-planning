@@ -9,6 +9,8 @@ dev_requires = [
 
 install_requires = [
     'nodeconductor>=0.95.0',
+    'lxml>=3.2',
+    'xhtml2pdf>=0.0.6',
 ]
 
 
@@ -55,6 +57,6 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Operating System :: OS Independent',
-        'License :: Apache v2',
+        'License :: OSI Approved :: Apache Software License',
     ],
 )

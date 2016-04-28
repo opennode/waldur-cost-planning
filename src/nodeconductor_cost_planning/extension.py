@@ -2,6 +2,10 @@ from nodeconductor.core import NodeConductorExtension
 
 
 class CostPlanningExtension(NodeConductorExtension):
+    class Settings:
+        NODECONDUCTOR_COST_PLANNING = {
+            'currency': 'USD',
+        }
 
     @staticmethod
     def django_app():

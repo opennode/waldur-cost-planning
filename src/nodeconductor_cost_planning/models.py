@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from decimal import Decimal
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -40,6 +42,8 @@ class DeploymentPlan(core_models.UuidMixin, core_models.NameMixin, TimeStampedMo
 
     customer = models.ForeignKey(Customer, related_name='+')
     email_to = models.EmailField(blank=True)
+    pdf = models.FileField(upload_to='deployment_plans', blank=True, null=True)
+
     tracker = FieldTracker()
 
     @property
@@ -57,9 +61,24 @@ class DeploymentPlan(core_models.UuidMixin, core_models.NameMixin, TimeStampedMo
     def __str__(self):
         return self.name
 
+    @property
+    def total_price(self):
+        items = self.items.exclude(price_list_item__isnull=True)
+        return sum(Decimal(item.price_list_item.monthly_rate) * item.quantity for item in items)
+
 
 @python_2_unicode_compatible
 class DeploymentPlanItem(models.Model):
+    """
+    Plan item specifies how much applications customer needs.
+    Also plan item is used to store matching price list item.
+    For example:
+    {
+        "configuration": "<Key to Hadoop DataNode>",
+        "quantity": 10,
+        "price_list_item": "<Key to Azure flavor price list list item>"
+    }
+    """
     class Meta:
         ordering = 'plan', 'configuration'
         unique_together = 'plan', 'configuration'
@@ -107,9 +126,11 @@ class DeploymentPlanItem(models.Model):
         return price_item
 
     def metadata_matches(self, required, actual):
-        for key, val in required.items():
-            if key in actual and actual[key] >= required[key]:
-                return True
+        """
+        Check if actual configuration matches requirements.
+        """
+        return set(required.keys()) - set(actual.keys()) == set() and \
+               all(actual[key] >= val for key, val in required.items())
 
     def __str__(self):
         return '%s %s' % (self.quantity, self.configuration)
@@ -126,6 +147,20 @@ class Category(core_models.NameMixin):
 
 @python_2_unicode_compatible
 class Configuration(core_models.UuidMixin, core_models.NameMixin):
+    """
+    Configuration specifies hardware requirements for applications.
+    For example:
+    {
+        "category": "Big Data",
+        "name": "Hadoop DataNode",
+        "variant": "Large",
+        "requirements": {
+            "cores": 8,
+            "disk": 10240,
+            "ram": 64
+        }
+    }
+    """
     class Meta:
         ordering = ['category', 'name', 'variant']
 

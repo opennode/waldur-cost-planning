@@ -76,4 +76,9 @@ class Migration(migrations.Migration):
             name='deploymentplanitem',
             unique_together=set([('plan', 'configuration')]),
         ),
+        migrations.AddField(
+            model_name='deploymentplan',
+            name='pdf',
+            field=models.FileField(null=True, upload_to='deployment_plans', blank=True),
+        ),
     ]

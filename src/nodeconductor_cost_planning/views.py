@@ -51,13 +51,13 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
                     {
                         "configuration": {
                             "url": "http://example.com/api/deployment-configurations/2debb6d109954afaa03910ba1c6791a6/",
-                            "category": "WebServer",
-                            "name": "Apache",
-                            "variant": "Small",
+                            "category": "Big Data",
+                            "name": "Hadoop",
+                            "variant": "Large",
                             "requirements": {
-                                "cores": 1,
-                                "disk": 71680,
-                                "ram": 1792
+                                "cores": 8,
+                                "disk": 10240,
+                                "ram": 64
                             }
                         },
                         "quantity": 10
