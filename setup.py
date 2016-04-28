@@ -37,7 +37,7 @@ setup(
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://nodeconductor.com',
-    description='Allows to get a price estimate without actually creating the infrastructure.',
+    description='NodeConductor cost planning plugin allows to get a price estimate without actually creating the infrastructure.',
     long_description=open('README.rst').read(),
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),

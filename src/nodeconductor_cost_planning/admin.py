@@ -30,7 +30,7 @@ class DeploymentPlanAdmin(admin.ModelAdmin):
     inlines = DeploymentPlanItem,
     search_fields = 'name',
     list_display = 'name', 'customer', 'resource_content_type'
-    actions = ['generate_pdf']
+    actions = ['generate_pdf', 'send_report']
 
     def generate_pdf(self, request, queryset):
         for plan in queryset.iterator():
@@ -49,6 +49,25 @@ class DeploymentPlanAdmin(admin.ModelAdmin):
         self.message_user(request, message)
 
     generate_pdf.short_description = "Generate PDF"
+
+    def send_report(self, request, queryset):
+        plans = queryset.exclude(email_to='')
+        for plan in plans:
+            send_task('cost_planning', 'send_report')(plan.id)
+
+        tasks_scheduled = plans.count()
+        message = ungettext(
+            'Sending emails for one plan.',
+            'Sending emails for %(tasks_scheduled)d plans.',
+            tasks_scheduled
+        )
+        message = message % {
+            'tasks_scheduled': tasks_scheduled,
+        }
+
+        self.message_user(request, message)
+
+    send_report.short_description = "Send email with plan details"
 
 
 admin.site.register(models.Category, CategoryAdmin)

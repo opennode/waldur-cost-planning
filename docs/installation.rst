@@ -9,7 +9,7 @@ Installation
 
     git clone https://github.com/opennode/nodeconductor-cost-planning.git
 
-* Install NodeConductor CostPlanning into NodeConductor virtual environment
+* Install NodeConductor cost planning plugin into NodeConductor virtual environment
 
   .. code-block:: bash
 

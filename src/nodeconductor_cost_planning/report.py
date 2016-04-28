@@ -10,33 +10,19 @@ import xhtml2pdf.pisa as pisa
 logger = logging.getLogger(__name__)
 
 
-class PlanReportGenerator(object):
+class BaseReportGenerator(object):
     TEMPLATE = 'nodeconductor_cost_planning/report.html'
 
     def __init__(self, plan):
         self.plan = plan
 
-    def generate_pdf(self):
-        # cleanup if pdf already existed
-        if self.plan.pdf is not None:
-            self.plan.pdf.delete()
+    def render_html(self):
+        return render_to_string(self.TEMPLATE, self.get_context())
 
-        context = {'plan': self.get_plan_dict(self.plan)}
-        result = StringIO.StringIO()
-        pdf = pisa.pisaDocument(
-            StringIO.StringIO(render_to_string(self.TEMPLATE, context)), result)
+    def get_context(self):
+        return {'plan': self.get_plan_dict()}
 
-        # generate a new file
-        if not pdf.err:
-            self.plan.pdf.save(self.generate_file_name(), ContentFile(result.getvalue()))
-            self.plan.save(update_fields=['pdf'])
-        else:
-            logger.error(pdf.err)
-
-    def generate_file_name(self):
-        return 'deployment-plan-{}-{}.pdf'.format(self.plan.created.strftime('%Y-%m-%d'), self.plan.pk)
-
-    def get_plan_dict(self, plan):
+    def get_plan_dict(self):
         items = map(self.get_item_dict, self.plan.items.exclude(price_list_item__isnull=True))
         return {
             'name': self.plan.name,
@@ -58,3 +44,23 @@ class PlanReportGenerator(object):
 
     def format_dict(self, items):
         return ", ".join("{}: {}".format(key, val) for (key, val) in items)
+
+
+class PlanReportGenerator(BaseReportGenerator):
+    def generate_pdf(self):
+        # cleanup if pdf already existed
+        if self.plan.pdf is not None:
+            self.plan.pdf.delete()
+
+        buffer = StringIO.StringIO()
+        pdf = pisa.pisaDocument(StringIO.StringIO(self.render_html()), buffer)
+
+        # generate a new file
+        if not pdf.err:
+            self.plan.pdf.save(self.generate_file_name(), ContentFile(buffer.getvalue()))
+            self.plan.save(update_fields=['pdf'])
+        else:
+            logger.error(pdf.err)
+
+    def generate_file_name(self):
+        return 'deployment-plan-{}-{}.pdf'.format(self.plan.created.strftime('%Y-%m-%d'), self.plan.pk)
