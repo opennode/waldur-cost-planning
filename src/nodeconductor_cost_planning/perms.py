@@ -13,5 +13,5 @@ PERMISSION_LOGICS = (
         any_permission=True,
     )),
     ('nodeconductor_cost_planning.Category', StaffPermissionLogic(any_permission=True)),
-    ('nodeconductor_cost_planning.Configuration', StaffPermissionLogic(any_permission=True)),
+    ('nodeconductor_cost_planning.Preset', StaffPermissionLogic(any_permission=True)),
 )

@@ -23,7 +23,7 @@ class HtmlReportGenerator(object):
         return {'plan': self.get_plan_dict()}
 
     def get_plan_dict(self):
-        items = map(self.get_item_dict, self.plan.items.exclude(price_list_item__isnull=True))
+        items = map(self.get_item_dict, self.plan.items.all())
         return {
             'name': self.plan.name,
             'customer': self.plan.customer.name,
@@ -33,14 +33,27 @@ class HtmlReportGenerator(object):
             'currency': settings.NODECONDUCTOR_COST_PLANNING.get('currency', '')
         }
 
-    def get_item_dict(self, item):
+    def get_item_dict(self, plan_item):
         return {
-            'description': force_text(item.configuration),
-            'configuration': self.format_dict(item.configuration.metadata.items()),
-            'flavor': item.price_list_item.key,
-            'quantity': item.quantity,
-            'price': item.price_list_item.monthly_rate
+            'title': force_text(plan_item.preset),
+            'description': self.get_description(plan_item),
+            'quantity': plan_item.quantity,
+            'price': plan_item.total_price
         }
+
+    def get_description(self, plan_item):
+        parts = []
+        for preset_item in plan_item.price_list_items:
+            price_list_item = preset_item.default_price_list_item
+            part = '{} x {} {}'.format(
+                preset_item.quantity,
+                price_list_item.item_type,
+                price_list_item.key
+            )
+            if hasattr(price_list_item.metadata, 'items'):
+                part += ' ({})'.format(self.format_dict(price_list_item.metadata.items()))
+            parts.append(part)
+        return "; ".join(parts)
 
     def format_dict(self, items):
         return ", ".join("{}: {}".format(key, val) for (key, val) in items)

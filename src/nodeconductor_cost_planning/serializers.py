@@ -5,50 +5,43 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from nodeconductor.core.serializers import JSONField, AugmentedSerializerMixin, GenericRelatedField
-from nodeconductor.cost_tracking.serializers import PriceListItemSerializer
 from nodeconductor.structure import SupportedServices
 
 from . import models
 
 
-class ConfigurationSerializer(serializers.HyperlinkedModelSerializer):
+class PresetSerializer(serializers.HyperlinkedModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
     variant = serializers.ReadOnlyField(source='get_variant_display')
     requirements = JSONField(source='metadata', read_only=True)
 
     class Meta:
-        model = models.Configuration
+        model = models.Preset
         fields = ('url', 'uuid', 'name', 'category', 'variant', 'requirements')
         extra_kwargs = {
-            'url': {'lookup_field': 'uuid', 'view_name': 'deployment-configuration-detail'},
+            'url': {'lookup_field': 'uuid', 'view_name': 'deployment-preset-detail'},
         }
         read_only_fields = 'name',
 
 
 class DeploymentPlanItemSerializer(serializers.ModelSerializer):
-    configuration = ConfigurationSerializer()
-    price_list_item = PriceListItemSerializer()
+    preset = PresetSerializer()
 
     class Meta:
         model = models.DeploymentPlanItem
-        fields = ('configuration', 'quantity', 'price_list_item')
+        fields = ('preset', 'quantity')
 
 
 class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.DeploymentPlanItem
-        fields = ('configuration', 'quantity')
+        fields = ('preset', 'quantity')
         extra_kwargs = {
-            'configuration': {
+            'preset': {
                 'lookup_field': 'uuid',
-                'view_name': 'deployment-configuration-detail'
+                'view_name': 'deployment-preset-detail'
             }
         }
-
-    def validate_configuration(self, configuration):
-        if configuration.metadata == '':
-            raise ValidationError('Configuration should have metadata')
-        return configuration
 
 
 class LazyServicesList(object):
@@ -112,22 +105,22 @@ class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
         if items is None:
             return plan
 
-        current_map = {item.configuration_id: item.quantity for item in plan.items.all()}
+        current_map = {item.preset_id: item.quantity for item in plan.items.all()}
         current_ids = set(current_map.keys())
 
-        new_map = {item['configuration'].id: item['quantity'] for item in items}
+        new_map = {item['preset'].id: item['quantity'] for item in items}
         new_ids = set(new_map.keys())
 
         with transaction.atomic():
             # Remove stale items
-            plan.items.filter(configuration_id__in=current_ids - new_ids).delete()
+            plan.items.filter(preset_id__in=current_ids - new_ids).delete()
 
             # Create new items
             for item_id in new_ids - current_ids:
-                plan.items.create(configuration_id=item_id, quantity=new_map[item_id])
+                plan.items.create(preset_id=item_id, quantity=new_map[item_id])
 
             # Update existing items
             for item_id in new_ids & current_ids:
-                plan.items.filter(configuration_id=item_id).update(quantity=new_map[item_id])
+                plan.items.filter(preset_id=item_id).update(quantity=new_map[item_id])
 
         return plan

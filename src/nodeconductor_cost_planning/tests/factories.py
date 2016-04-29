@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import factory
 from django.core.urlresolvers import reverse
 
+from nodeconductor.cost_tracking.tests.factories import DefaultPriceListItemFactory
 from nodeconductor.structure.tests import factories as structure_factories
 
 from .. import models
@@ -31,16 +32,22 @@ class CategoryFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: 'category%s' % n)
 
 
-class ConfigurationFactory(factory.DjangoModelFactory):
+class PresetFactory(factory.DjangoModelFactory):
     class Meta(object):
-        model = models.Configuration
+        model = models.Preset
 
-    name = factory.Sequence(lambda n: 'configuration%s' % n)
+    name = factory.Sequence(lambda n: 'preset%s' % n)
     category = factory.SubFactory(CategoryFactory)
-    metadata = {'ram': 1024, 'cores': 1, 'disk': 10240}
 
     @classmethod
     def get_url(cls, obj=None):
         if obj is None:
-            obj = ConfigurationFactory()
-        return 'http://testserver' + reverse('deployment-configuration-detail', kwargs={'uuid': obj.uuid.hex})
+            obj = PresetFactory()
+        return 'http://testserver' + reverse('deployment-preset-detail', kwargs={'uuid': obj.uuid.hex})
+
+
+class PresetItemFactory(factory.DjangoModelFactory):
+    class Meta(object):
+        model = models.PresetItem
+
+    default_price_list_item = factory.SubFactory(DefaultPriceListItemFactory)

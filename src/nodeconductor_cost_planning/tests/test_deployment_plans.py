@@ -1,8 +1,7 @@
-from django.contrib.contenttypes.models import ContentType
 from rest_framework import status, test
 
-from nodeconductor.cost_tracking.models import DefaultPriceListItem, PriceListItem
-from nodeconductor.openstack.models import Instance
+from nodeconductor.core.utils import hours_in_month
+from nodeconductor.cost_tracking.tests.factories import DefaultPriceListItemFactory
 from nodeconductor.openstack.tests.factories import OpenStackServiceFactory
 from nodeconductor.structure.models import CustomerRole
 from nodeconductor.structure.tests import factories as structure_factories
@@ -75,7 +74,7 @@ class DeploymentPlanCreateTest(BaseTest):
             'name': 'Webapp for Monster Inc.',
             'items': [
                 {
-                    'configuration': factories.ConfigurationFactory.get_url(),
+                    'preset': factories.PresetFactory.get_url(),
                     'quantity': 1
                 }
             ]
@@ -87,11 +86,11 @@ class DeploymentPlanUpdateTest(BaseTest):
         super(DeploymentPlanUpdateTest, self).setUp()
         self.plan = factories.DeploymentPlanFactory(customer=self.owned_customer)
 
-        self.conf1 = factories.ConfigurationFactory()
-        self.plan.items.create(configuration=self.conf1, quantity=1)
+        self.preset1 = factories.PresetFactory()
+        self.plan.items.create(preset=self.preset1, quantity=1)
 
-        self.conf2 = factories.ConfigurationFactory()
-        self.plan.items.create(configuration=self.conf2, quantity=2)
+        self.preset2 = factories.PresetFactory()
+        self.plan.items.create(preset=self.preset2, quantity=2)
 
     def test_other_customer_can_not_update_plan(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -107,7 +106,7 @@ class DeploymentPlanUpdateTest(BaseTest):
         self.client.force_authenticate(user=self.customer_owner)
 
         item = {
-            'configuration': factories.ConfigurationFactory.get_url(self.conf1),
+            'preset': factories.PresetFactory.get_url(self.preset1),
             'quantity': 2
         }
         response = self.client.put(factories.DeploymentPlanFactory.get_url(self.plan), {
@@ -141,45 +140,27 @@ class DeploymentPlanUpdateTest(BaseTest):
         self.assertEqual(refreshed_plan.service, service)
 
 
-class DeploymentPlanItemPriceTest(test.APISimpleTestCase):
-    def setUp(self):
-        self.ct = ContentType.objects.get_for_model(Instance)
-        self.required = {
-            "cores": 1,
-            "disk": 71680,
-            "ram": 1792
-        }
-        self.actual = {
-            "cores": 16,
-            "disk": 819200,
-            "ram": 114688,
-        }
-        self.params = {
-            'resource_content_type': self.ct,
-            'key': 'Standard Flavor',
-            'item_type': 'flavor',
-            'value': 1.6261
-        }
+class DeploymentPlanPriceTest(test.APISimpleTestCase):
+    def test_plan_price(self):
+        customer = structure_factories.CustomerFactory()
+        service = OpenStackServiceFactory(customer=customer)
 
-    def test_when_deployment_plan_item_is_created_matching_price_list_item_is_found(self):
-        service = OpenStackServiceFactory()
-        plan = factories.DeploymentPlanFactory(service=service)
-        DefaultPriceListItem.objects.create(metadata=self.actual, **self.params)
-        price_list_item = PriceListItem.objects.create(service=service, **self.params)
+        item_type = 'storage'
+        key = '1 GB'
 
-        conf1 = factories.ConfigurationFactory(metadata=self.required)
-        plan.items.create(configuration=conf1, quantity=1)
-        self.assertEqual(plan.items.first().price_list_item, price_list_item)
+        storage_price = 10
+        storage_per_instance = 200
+        instance_count = 3
 
-    def test_when_deployment_plan_service_is_updated_matching_price_list_item_is_found(self):
-        service = OpenStackServiceFactory()
-        plan = factories.DeploymentPlanFactory()
-        DefaultPriceListItem.objects.create(metadata=self.actual, **self.params)
-        price_list_item = PriceListItem.objects.create(service=service, **self.params)
+        default_item = DefaultPriceListItemFactory(item_type=item_type, key=key, value=storage_price)
 
-        conf1 = factories.ConfigurationFactory(metadata=self.required)
-        plan.items.create(configuration=conf1, quantity=1)
+        preset = factories.PresetFactory()
+        factories.PresetItemFactory(preset=preset,
+                                    default_price_list_item=default_item,
+                                    quantity=storage_per_instance)
 
-        plan.service = service
-        plan.save()
-        self.assertEqual(plan.items.first().price_list_item, price_list_item)
+        plan = factories.DeploymentPlanFactory(customer=customer, service=service)
+        models.DeploymentPlanItem.objects.create(plan=plan, preset=preset, quantity=instance_count)
+
+        expected = hours_in_month() * storage_price * storage_per_instance * instance_count
+        self.assertEqual(plan.total_price, expected)

@@ -102,8 +102,8 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
         return super(DeploymentPlanViewSet, self).update(request, *args, **kwargs)
 
 
-class ConfigurationViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = models.Configuration.objects.all()
-    serializer_class = serializers.ConfigurationSerializer
+class PresetViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = models.Preset.objects.all()
+    serializer_class = serializers.PresetSerializer
     lookup_field = 'uuid'
     permission_classes = (permissions.IsAuthenticated,)

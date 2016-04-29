@@ -66,9 +66,9 @@
                 <tr>
                     <td>
                         {{ forloop.counter }})
-                        <b>{{ item.description }}</b>
+                        <b>{{ item.title }}</b>
                         <br/>
-                        {{ item.flavor }} ({{ item.configuration }})
+                        {{ item.description }}
                     </td>
                     <td width="80" align="center">{{ item.quantity }}</td>
                     <td width="200" align="center">{{ item.price | floatformat:2 | intcomma }} {{ plan.currency }} / month</td>

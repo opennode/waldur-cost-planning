@@ -7,29 +7,37 @@ from nodeconductor.core.tasks import send_task
 from . import models
 
 
-class ConfigurationAdmin(admin.ModelAdmin):
+class PresetItemInline(admin.TabularInline):
+    model = models.PresetItem
+    extra = 1
+
+
+class PresetAdmin(admin.ModelAdmin):
     list_display = 'category', 'variant', 'name'
     list_filter = 'category',
+    inlines = PresetItemInline,
 
 
-class ConfigurationInline(admin.TabularInline):
-    model = models.Configuration
+class PresetInline(admin.TabularInline):
+    model = models.Preset
     extra = 1
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    inlines = ConfigurationInline,
+    inlines = PresetInline,
 
 
 class DeploymentPlanItem(admin.TabularInline):
     model = models.DeploymentPlanItem
     extra = 1
+    fields = 'preset', 'quantity', 'total_price'
+    readonly_fields = 'total_price',
 
 
 class DeploymentPlanAdmin(admin.ModelAdmin):
     inlines = DeploymentPlanItem,
     search_fields = 'name',
-    list_display = 'name', 'customer', 'resource_content_type'
+    list_display = 'name', 'customer'
     actions = ['generate_pdf', 'send_report']
 
     def generate_pdf(self, request, queryset):
@@ -71,5 +79,5 @@ class DeploymentPlanAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Category, CategoryAdmin)
-admin.site.register(models.Configuration, ConfigurationAdmin)
+admin.site.register(models.Preset, PresetAdmin)
 admin.site.register(models.DeploymentPlan, DeploymentPlanAdmin)
