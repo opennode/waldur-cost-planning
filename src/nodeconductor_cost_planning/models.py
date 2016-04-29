@@ -112,15 +112,12 @@ class DeploymentPlanItem(models.Model):
         default_items = [item.key for item in default_items
                          if self.metadata_matches(self.configuration.metadata, item.metadata)]
 
-        try:
-            return PriceListItem.objects.filter(
-                key__in=default_items,
-                resource_content_type=resource_content_type,
-                content_type=self.plan.content_type,
-                object_id=self.plan.object_id).\
-                order_by('value').first()
-        except PriceListItem.DoesNotExist:
-            return None
+        return PriceListItem.objects.filter(
+            key__in=default_items,
+            resource_content_type=resource_content_type,
+            content_type=self.plan.content_type,
+            object_id=self.plan.object_id).\
+            order_by('value').first()
 
     def metadata_matches(self, required, actual):
         """
