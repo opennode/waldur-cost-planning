@@ -75,7 +75,7 @@ class DeploymentPlanItem(models.Model):
     {
         "configuration": "<Key to Hadoop DataNode>",
         "quantity": 10,
-        "price_list_item": "<Key to Azure flavor price list list item>"
+        "price_list_item": "<Key to Azure flavor price list item>"
     }
     """
     class Meta:
@@ -106,23 +106,21 @@ class DeploymentPlanItem(models.Model):
         1) matches configuration's requirements;
         2) belongs to plan's service provider.
         """
-        price_item = None
         resource_content_type = self.plan.resource_content_type
 
         default_items = DefaultPriceListItem.objects.filter(resource_content_type=resource_content_type).exclude(metadata='')
         default_items = [item.key for item in default_items
                          if self.metadata_matches(self.configuration.metadata, item.metadata)]
-        price_items = PriceListItem.objects.filter(
-            key__in=default_items,
-            resource_content_type=resource_content_type,
-            content_type=self.plan.content_type,
-            object_id=self.plan.object_id).\
-            order_by('value')
 
-        # Find cheapest offer
-        if price_items.count() != 0:
-            price_item = price_items[0]
-        return price_item
+        try:
+            return PriceListItem.objects.filter(
+                key__in=default_items,
+                resource_content_type=resource_content_type,
+                content_type=self.plan.content_type,
+                object_id=self.plan.object_id).\
+                order_by('value').first()
+        except PriceListItem.DoesNotExist:
+            return None
 
     def metadata_matches(self, required, actual):
         """
