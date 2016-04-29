@@ -13,15 +13,13 @@ from . import models
 class PresetSerializer(serializers.HyperlinkedModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
     variant = serializers.ReadOnlyField(source='get_variant_display')
-    requirements = JSONField(source='metadata', read_only=True)
 
     class Meta:
         model = models.Preset
-        fields = ('url', 'uuid', 'name', 'category', 'variant', 'requirements')
+        fields = ('url', 'uuid', 'name', 'category', 'variant')
         extra_kwargs = {
             'url': {'lookup_field': 'uuid', 'view_name': 'deployment-preset-detail'},
         }
-        read_only_fields = 'name',
 
 
 class DeploymentPlanItemSerializer(serializers.ModelSerializer):
@@ -29,7 +27,7 @@ class DeploymentPlanItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DeploymentPlanItem
-        fields = ('preset', 'quantity')
+        fields = ('preset', 'quantity', 'total_price')
 
 
 class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -58,7 +56,7 @@ class BaseDeploymentPlanSerializer(AugmentedSerializerMixin,
                                    serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.DeploymentPlan
-        fields = 'url', 'uuid', 'name', 'customer', 'items', 'service'
+        fields = 'url', 'uuid', 'name', 'customer', 'items', 'service', 'total_price'
         extra_kwargs = {
             'url': {
                 'lookup_field': 'uuid',

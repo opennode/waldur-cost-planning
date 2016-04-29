@@ -42,27 +42,25 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
             Host: example.com
 
             {
-                "url": "http://example.com/api/deployment-plans/c218cbb2f56c4d52a82638ca9fffd85a/",
-                "uuid": "c218cbb2f56c4d52a82638ca9fffd85a",
+                "url": "http://example.com/api/deployment-plans/b12bb98a661749ffb02c8a8439299288/",
+                "uuid": "b12bb98a661749ffb02c8a8439299288",
                 "name": "Webapp for Monster Inc",
-                "resource_type": "OpenStack.Instance",
-                "customer": "http://example.com/api/customers/2f8b4e0f101545508d52c7655d6386c8/",
+                "customer": "http://example.com/api/customers/790b3c131e894581b3dcf66796d9fa30/",
                 "items": [
                     {
-                        "configuration": {
-                            "url": "http://example.com/api/deployment-configurations/2debb6d109954afaa03910ba1c6791a6/",
-                            "category": "Big Data",
-                            "name": "Hadoop",
-                            "variant": "Large",
-                            "requirements": {
-                                "cores": 8,
-                                "disk": 10240,
-                                "ram": 64
-                            }
+                        "preset": {
+                            "url": "http://example.com/api/deployment-presets/628cd853ba2a4ce7af5d4fff510b5bd2/",
+                            "uuid": "628cd853ba2a4ce7af5d4fff510b5bd2",
+                            "name": "MySQL",
+                            "category": "Databases",
+                            "variant": "Large"
                         },
-                        "quantity": 10
+                        "quantity": 1,
+                        "total_price": 182.23
                     }
-                ]
+                ],
+                "service": "http://example.com/api/azure/54121cd1cde24b73a1c194d74a305cd2/",
+                "total_price": 182.23
             }
         """
         return super(DeploymentPlanViewSet, self).retrieve(request, *args, **kwargs)
@@ -82,9 +80,10 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
             {
                 "name": "WebApps",
                 "customer": "http://example.com/api/customers/2f8b4e0f101545508d52c7655d6386c8/",
+                "service": "http://example.com/api/azure/54121cd1cde24b73a1c194d74a305cd2/",
                 "items": [
                     {
-                        "configuration": "http://example.com/api/deployment-configurations/2debb6d109954afaa03910ba1c6791a6/",
+                        "preset": "http://example.com/api/deployment-presets/2debb6d109954afaa03910ba1c6791a6/",
                         "quantity": 1
                     }
                 ]
