@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from nodeconductor.core.permissions import FilteredCollaboratorsPermissionLogic
+from nodeconductor.core.permissions import FilteredCollaboratorsPermissionLogic, StaffPermissionLogic
 from nodeconductor.structure import models as structure_models
 
 
@@ -12,4 +12,6 @@ PERMISSION_LOGICS = (
         },
         any_permission=True,
     )),
+    ('nodeconductor_cost_planning.Category', StaffPermissionLogic(any_permission=True)),
+    ('nodeconductor_cost_planning.Configuration', StaffPermissionLogic(any_permission=True)),
 )

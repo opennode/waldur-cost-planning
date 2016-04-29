@@ -34,7 +34,7 @@ class DeploymentPlanAdmin(admin.ModelAdmin):
 
     def generate_pdf(self, request, queryset):
         for plan in queryset.iterator():
-            send_task('cost_planning', 'generate_pdf')(plan.id)
+            send_task('cost_planning', 'generate_pdf')(plan.uuid.hex)
 
         tasks_scheduled = queryset.count()
         message = ungettext(
@@ -53,7 +53,7 @@ class DeploymentPlanAdmin(admin.ModelAdmin):
     def send_report(self, request, queryset):
         plans = queryset.exclude(email_to='')
         for plan in plans:
-            send_task('cost_planning', 'send_report')(plan.id)
+            send_task('cost_planning', 'send_report')(plan.uuid.hex)
 
         tasks_scheduled = plans.count()
         message = ungettext(

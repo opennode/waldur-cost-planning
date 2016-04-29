@@ -6,7 +6,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
@@ -169,9 +168,9 @@ class Configuration(core_models.UuidMixin, core_models.NameMixin):
     LARGE = 'large'
 
     VARIANTS = (
-        (SMALL, _('Small')),
-        (MEDIUM, _('Medium')),
-        (LARGE, _('Large')),
+        (SMALL, 'Small'),
+        (MEDIUM, 'Medium'),
+        (LARGE, 'Large'),
     )
 
     metadata = JSONField(blank=True, help_text="Metadata stores expected hardware configuration (RAM, CPU, HDD)")

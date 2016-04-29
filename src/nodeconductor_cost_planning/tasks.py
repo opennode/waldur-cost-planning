@@ -12,30 +12,30 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(name='nodeconductor.cost_planning.generate_pdf')
-def generate_pdf(plan_id):
+def generate_pdf(plan_uuid):
     try:
-        plan = models.DeploymentPlan.objects.get(pk=plan_id)
+        plan = models.DeploymentPlan.objects.get(uuid=plan_uuid)
     except models.DeploymentPlan.DoesNotExist:
-        logger.warning('Missing deployment plan with id %s', plan_id)
+        logger.warning('Missing deployment plan with uuid %s', plan_uuid)
         return
 
-    report.PlanReportGenerator(plan).generate_pdf()
+    report.PdfReportGenerator(plan).generate_pdf()
 
 
 @shared_task(name='nodeconductor.cost_planning.send_report')
-def send_report(plan_id):
+def send_report(plan_uuid):
     try:
-        plan = models.DeploymentPlan.objects.get(pk=plan_id)
+        plan = models.DeploymentPlan.objects.get(uuid=plan_uuid)
     except models.DeploymentPlan.DoesNotExist:
-        logger.warning('Missing deployment plan with id %s', plan_id)
+        logger.warning('Missing deployment plan with uuid %s', plan_uuid)
         return
 
     if not plan.email_to:
-        logger.warning('Missing destination email for plan with id %s', plan_id)
+        logger.warning('Missing destination email for plan with uuid %s', plan_uuid)
         return
 
     subject = 'Deployment plan details for %s' % plan.name
-    body = report.BaseReportGenerator(plan).render_html()
+    body = report.HtmlReportGenerator(plan).render_html()
     send_mail(subject,
               message='Attachment contains deployment plan detail',
               html_message=body,

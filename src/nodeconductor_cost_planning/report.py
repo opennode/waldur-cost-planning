@@ -10,7 +10,7 @@ import xhtml2pdf.pisa as pisa
 logger = logging.getLogger(__name__)
 
 
-class BaseReportGenerator(object):
+class HtmlReportGenerator(object):
     TEMPLATE = 'nodeconductor_cost_planning/report.html'
 
     def __init__(self, plan):
@@ -46,18 +46,18 @@ class BaseReportGenerator(object):
         return ", ".join("{}: {}".format(key, val) for (key, val) in items)
 
 
-class PlanReportGenerator(BaseReportGenerator):
+class PdfReportGenerator(HtmlReportGenerator):
     def generate_pdf(self):
         # cleanup if pdf already existed
         if self.plan.pdf is not None:
             self.plan.pdf.delete()
 
-        buffer = StringIO.StringIO()
-        pdf = pisa.pisaDocument(StringIO.StringIO(self.render_html()), buffer)
+        buff = StringIO.StringIO()
+        pdf = pisa.pisaDocument(StringIO.StringIO(self.render_html()), buff)
 
         # generate a new file
         if not pdf.err:
-            self.plan.pdf.save(self.generate_file_name(), ContentFile(buffer.getvalue()))
+            self.plan.pdf.save(self.generate_file_name(), ContentFile(buff.getvalue()))
             self.plan.save(update_fields=['pdf'])
         else:
             logger.error(pdf.err)

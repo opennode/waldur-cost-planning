@@ -15,7 +15,7 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
     filter_class = filters.DeploymentPlanFilter
 
     def get_serializer_class(self):
-        if self.action in ('create', 'update'):
+        if self.action in ('create', 'update', 'partial_update'):
             return serializers.DeploymentPlanCreateSerializer
         return self.serializer_class
 
