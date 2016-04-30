@@ -81,7 +81,7 @@ class DeploymentPlanItem(models.Model):
     def price_list_items(self):
         # Terminate if plan does not have service
         if self.plan.service is None:
-            return 0
+            return []
 
         # Get resource content types for plan's service
         resources = SupportedServices.get_related_models(self.plan.service)['resources']
@@ -89,7 +89,7 @@ class DeploymentPlanItem(models.Model):
 
         # Terminate if service does not have resources
         if not resource_types:
-            return 0
+            return []
 
         items = self.preset.items.filter(
             default_price_list_item__resource_content_type__in=resource_types
