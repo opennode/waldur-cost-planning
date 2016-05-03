@@ -7,8 +7,9 @@ License: Copyright 2016 OpenNode LLC.  All rights reserved.
 Url: http://nodeconductor.com
 Source0: %{name}-%{version}.tar.gz
 
-# FIXME: set actual requirements
-Requires: nodeconductor >= 42.42.42
+Requires: nodeconductor >= 0.96.0
+Requires: python-lxml >= 3.2.0
+Requires: python-xhtml2pdf >= 0.0.6
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -35,6 +36,5 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
-# FIXME: set actual release date and releaser name/email
-* Thu Apr 28 2016 Juri Hudolejev <juri@opennodecloud.com> - 0.1.0-1.el7
+* Tue May 3 2016 Victor Mireyev <victor@opennodecloud.com> - 0.1.0-1.el7
 - Initial version of the package
