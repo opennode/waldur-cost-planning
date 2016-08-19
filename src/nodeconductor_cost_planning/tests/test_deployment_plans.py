@@ -2,7 +2,7 @@ from rest_framework import status, test
 
 from nodeconductor.core.utils import hours_in_month
 from nodeconductor.cost_tracking.tests.factories import DefaultPriceListItemFactory
-from nodeconductor.openstack.tests.factories import OpenStackServiceFactory
+from nodeconductor.structure.tests.factories import TestServiceFactory
 from nodeconductor.structure.models import CustomerRole
 from nodeconductor.structure.tests import factories as structure_factories
 
@@ -23,7 +23,7 @@ class BaseTest(test.APISimpleTestCase):
 class DeploymentPlanListTest(BaseTest):
     def setUp(self):
         super(DeploymentPlanListTest, self).setUp()
-        service = OpenStackServiceFactory(customer=self.owned_customer)
+        service = TestServiceFactory(customer=self.owned_customer)
         models.DeploymentPlan.objects.all().delete()
         factories.DeploymentPlanFactory.create(customer=self.owned_customer, service=service)
 
@@ -130,9 +130,9 @@ class DeploymentPlanUpdateTest(BaseTest):
     def test_customer_owner_can_update_service(self):
         self.client.force_authenticate(user=self.customer_owner)
 
-        service = OpenStackServiceFactory(customer=self.owned_customer)
+        service = TestServiceFactory(customer=self.owned_customer)
         response = self.client.put(factories.DeploymentPlanFactory.get_url(self.plan), {
-            'service': OpenStackServiceFactory.get_url(service)
+            'service': TestServiceFactory.get_url(service)
         })
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -143,7 +143,7 @@ class DeploymentPlanUpdateTest(BaseTest):
 class DeploymentPlanPriceTest(test.APISimpleTestCase):
     def test_plan_price(self):
         customer = structure_factories.CustomerFactory()
-        service = OpenStackServiceFactory(customer=customer)
+        service = TestServiceFactory(customer=customer)
 
         item_type = 'storage'
         key = '1 GB'
