@@ -1,10 +1,11 @@
 import django_filters
 
+from nodeconductor.core.filters import UUIDFilter
 from . import models
 
 
 class DeploymentPlanFilter(django_filters.FilterSet):
-    customer = django_filters.CharFilter(
+    customer = UUIDFilter(
         name='customer__uuid',
         distinct=True,
     )
