@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import django.utils.timezone
 import model_utils.fields
-import uuidfield.fields
+import nodeconductor.core.fields
 import nodeconductor.core.validators
 
 
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('name', models.CharField(max_length=150, verbose_name='name', validators=[nodeconductor.core.validators.validate_name])),
-                ('uuid', uuidfield.fields.UUIDField(unique=True, max_length=32, editable=False, blank=True)),
+                ('uuid', nodeconductor.core.fields.UUIDField()),
                 ('object_id', models.PositiveIntegerField(null=True, blank=True)),
                 ('email_to', models.EmailField(max_length=254, blank=True)),
                 ('pdf', models.FileField(null=True, upload_to='deployment_plans', blank=True)),
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=150, verbose_name='name', validators=[nodeconductor.core.validators.validate_name])),
-                ('uuid', uuidfield.fields.UUIDField(unique=True, max_length=32, editable=False, blank=True)),
+                ('uuid', nodeconductor.core.fields.UUIDField()),
                 ('variant', models.CharField(max_length=150, choices=[('small', 'Small'), ('medium', 'Medium'), ('large', 'Large')])),
                 ('category', models.ForeignKey(related_name='presets', to='nodeconductor_cost_planning.Category')),
             ],
