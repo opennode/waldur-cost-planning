@@ -1,7 +1,7 @@
 Name: nodeconductor-cost-planning
 Summary: NodeConductor cost planning plugin
 Group: Development/Libraries
-Version: 0.1.0
+Version: 0.2.0
 Release: 1.el7
 License: MIT
 Url: http://nodeconductor.com
@@ -36,5 +36,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
+* Sat Sep 17 2016 Jenkins <jenkins@opennodecloud.com> - 0.2.0-1.el7
+- New upstream release
+
 * Tue May 3 2016 Victor Mireyev <victor@opennodecloud.com> - 0.1.0-1.el7
 - Initial version of the package
