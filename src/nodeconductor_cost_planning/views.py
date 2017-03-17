@@ -1,10 +1,10 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, reverse, decorators, serializers as rf_serializers, response, status
 from rest_framework.filters import DjangoFilterBackend
 
 from nodeconductor.core import views as core_views
 from nodeconductor.structure import filters as structure_filters, permissions as structure_permissions
 
-from . import models, serializers, filters
+from . import models, serializers, filters, optimizers
 
 
 class DeploymentPlanViewSet(core_views.ActionsViewSet):
@@ -88,6 +88,28 @@ class DeploymentPlanViewSet(core_views.ActionsViewSet):
         return super(DeploymentPlanViewSet, self).update(request, *args, **kwargs)
 
     update_serializer_class = partial_update_serializer_class = serializers.DeploymentPlanCreateSerializer
+
+    @decorators.detail_route(methods=['GET'])
+    def evaluate(self, request, *args, **kwargs):
+        # XXX: This should be moved to serializers
+        optimizer = optimizers.SingleServiceOptimizer(self.get_object())
+        serialized = []
+        for optimized_service_settings in optimizer.get_optimized_service_settings():
+            serialized.append({
+                'service_settings_name': optimized_service_settings.settings.name,
+                'service_settings': reverse.reverse(
+                    'servicesettings-detail',
+                    kwargs={'uuid': optimized_service_settings.settings.uuid},
+                    request=request),
+                'package_templates': [
+                    {'quantity': pt['quantity'], 'name': pt['template'].name, 'price': pt['template'].monthly_price}
+                    for pt in optimized_service_settings.package_templates
+                ]
+            })
+        return response.Response(serialized, status=status.HTTP_200_OK)
+
+    evaluate_methods_permissions = [structure_permissions.is_owner]
+    evaluate_serializer_class = rf_serializers.Serializer
 
 
 class PresetViewSet(viewsets.ReadOnlyModelViewSet):
