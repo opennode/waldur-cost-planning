@@ -7,15 +7,9 @@ from nodeconductor.core.tasks import send_task
 from . import models
 
 
-class PresetItemInline(admin.TabularInline):
-    model = models.PresetItem
-    extra = 1
-
-
 class PresetAdmin(admin.ModelAdmin):
-    list_display = 'category', 'variant', 'name'
-    list_filter = 'category',
-    inlines = PresetItemInline,
+    list_display = ('category', 'variant', 'name', 'ram', 'cores', 'storage')
+    list_filter = ('category',)
 
 
 class PresetInline(admin.TabularInline):
@@ -24,20 +18,19 @@ class PresetInline(admin.TabularInline):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    inlines = PresetInline,
+    inlines = (PresetInline,)
 
 
 class DeploymentPlanItem(admin.TabularInline):
     model = models.DeploymentPlanItem
     extra = 1
-    fields = 'preset', 'quantity', 'total_price'
-    readonly_fields = 'total_price',
+    fields = ('preset', 'quantity')
 
 
 class DeploymentPlanAdmin(admin.ModelAdmin):
-    inlines = DeploymentPlanItem,
-    search_fields = 'name',
-    list_display = 'name', 'customer'
+    inlines = (DeploymentPlanItem,)
+    search_fields = ('name',)
+    list_display = ('name', 'customer')
     actions = ['generate_pdf', 'send_report']
 
     def generate_pdf(self, request, queryset):

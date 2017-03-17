@@ -2,21 +2,19 @@ from __future__ import unicode_literals
 
 from django.db import transaction
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
-from nodeconductor.core.serializers import JSONField, AugmentedSerializerMixin, GenericRelatedField
-from nodeconductor.structure import SupportedServices
+from nodeconductor.core import serializers as core_serializers
+from nodeconductor.structure import permissions as structure_permissions
 
 from . import models
 
 
 class PresetSerializer(serializers.HyperlinkedModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
-    variant = serializers.ReadOnlyField(source='get_variant_display')
 
     class Meta:
         model = models.Preset
-        fields = ('url', 'uuid', 'name', 'category', 'variant')
+        fields = ('url', 'uuid', 'name', 'category', 'ram', 'cores', 'storage')
         extra_kwargs = {
             'url': {'lookup_field': 'uuid', 'view_name': 'deployment-preset-detail'},
         }
@@ -27,7 +25,7 @@ class DeploymentPlanItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DeploymentPlanItem
-        fields = ('preset', 'quantity', 'total_price')
+        fields = ('preset', 'quantity',)
 
 
 class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,31 +40,16 @@ class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer)
         }
 
 
-class LazyServicesList(object):
-    def __init__(self):
-        self._items = None
+class BaseDeploymentPlanSerializer(core_serializers.AugmentedSerializerMixin, serializers.HyperlinkedModelSerializer):
 
-    def __iter__(self):
-        if self._items is None:
-            self._items = [service['service'] for service in SupportedServices.get_service_models().values()]
-        return iter(self._items)
-
-
-class BaseDeploymentPlanSerializer(AugmentedSerializerMixin,
-                                   serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.DeploymentPlan
-        fields = 'url', 'uuid', 'name', 'customer', 'items', 'service', 'total_price'
+        fields = ('url', 'uuid', 'name', 'customer', 'items')
+        protected_fields = ('customer',)
         extra_kwargs = {
-            'url': {
-                'lookup_field': 'uuid',
-                'view_name': 'deployment-plan-detail'
-            },
+            'url': {'lookup_field': 'uuid'},
             'customer': {'lookup_field': 'uuid'},
         }
-        protected_fields = 'customer',
-
-    service = GenericRelatedField(related_models=LazyServicesList(), required=False)
 
 
 class DeploymentPlanSerializer(BaseDeploymentPlanSerializer):
@@ -76,19 +59,9 @@ class DeploymentPlanSerializer(BaseDeploymentPlanSerializer):
 class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
     items = NestedDeploymentPlanItemSerializer(many=True, required=False)
 
-    def get_fields(self):
-        fields = super(DeploymentPlanCreateSerializer, self).get_fields()
-        fields['name'].required = False
-        return fields
-
-    def validate(self, attrs):
-        if 'service' in attrs:
-            customer = self.instance and self.instance.customer or attrs['customer']
-            service = attrs['service']
-
-            if service.customer != customer:
-                raise ValidationError('Service should belong to the same customer')
-        return attrs
+    def validate_customer(self, customer):
+        structure_permissions.is_owner(self.context['request'], self.context['view'], customer)
+        return customer
 
     def create(self, validated_data):
         items = validated_data.pop('items', [])
