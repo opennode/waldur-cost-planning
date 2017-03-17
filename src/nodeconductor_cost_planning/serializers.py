@@ -50,7 +50,7 @@ class NestedCertificatesSerializer(core_serializers.HyperlinkedRelatedModelSeria
 
 class BaseDeploymentPlanSerializer(core_serializers.AugmentedSerializerMixin, serializers.HyperlinkedModelSerializer):
     certifications = NestedCertificatesSerializer(
-        many=True, queryset=structure_models.ServiceCertification.objects.all())
+        many=True, queryset=structure_models.ServiceCertification.objects.all(), required=False)
 
     class Meta:
         model = models.DeploymentPlan

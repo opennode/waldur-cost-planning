@@ -107,14 +107,14 @@ class DeploymentPlanUpdateTest(test.APITransactionTestCase):
     @data('manager', 'admin', 'user')
     def test_user_without_permissions_cannot_update_plan(self, user):
         self.client.force_authenticate(user=getattr(self.fixture, user))
-        response = self.client.put(self.url, {'name': 'New name for plan'})
+        response = self.client.patch(self.url, {'name': 'New name for plan'})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @data('staff', 'owner')
     def test_user_with_permissions_can_update_name(self, user):
         self.client.force_authenticate(user=getattr(self.fixture, user))
 
-        response = self.client.put(self.url, {
+        response = self.client.patch(self.url, {
             'name': 'New name for plan'
         })
 
