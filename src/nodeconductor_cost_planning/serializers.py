@@ -4,8 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from nodeconductor.core import serializers as core_serializers
-from nodeconductor.structure import permissions as structure_permissions
-
+from nodeconductor.structure import permissions as structure_permissions, models as structure_models
 from . import models
 
 
@@ -40,11 +39,22 @@ class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer)
         }
 
 
+class NestedCertificatesSerializer(core_serializers.HyperlinkedRelatedModelSerializer):
+    class Meta:
+        model = structure_models.ServiceCertification
+        fields = ('url', 'uuid', 'name', 'description', 'link')
+        extra_kwargs = {
+            'url': {'lookup_field': 'uuid', 'view_name': 'service-certification-detail'},
+        }
+
+
 class BaseDeploymentPlanSerializer(core_serializers.AugmentedSerializerMixin, serializers.HyperlinkedModelSerializer):
+    certifications = NestedCertificatesSerializer(
+        many=True, queryset=structure_models.ServiceCertification.objects.all())
 
     class Meta:
         model = models.DeploymentPlan
-        fields = ('url', 'uuid', 'name', 'customer', 'items')
+        fields = ('url', 'uuid', 'name', 'customer', 'items', 'certifications')
         protected_fields = ('customer',)
         extra_kwargs = {
             'url': {'lookup_field': 'uuid'},
@@ -65,14 +75,24 @@ class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
 
     def create(self, validated_data):
         items = validated_data.pop('items', [])
+        certifications = validated_data.pop('certifications', [])
         plan = super(DeploymentPlanCreateSerializer, self).create(validated_data)
         for item in items:
             plan.items.create(**item)
+        plan.certifications.add(*certifications)
         return plan
 
     def update(self, instance, validated_data):
         items = validated_data.pop('items', None)
+        certifications = validated_data.pop('certifications', None)
+
         plan = super(DeploymentPlanCreateSerializer, self).update(instance, validated_data)
+
+        if certifications is not None:
+            with transaction.atomic():
+                plan.certifications.clear()
+                plan.certifications.add(*certifications)
+
         if items is None:
             return plan
 
