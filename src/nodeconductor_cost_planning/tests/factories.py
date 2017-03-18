@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import factory
 from django.core.urlresolvers import reverse
 
-from nodeconductor.cost_tracking.tests.factories import DefaultPriceListItemFactory
 from nodeconductor.structure.tests import factories as structure_factories
 
 from .. import models
@@ -44,10 +43,3 @@ class PresetFactory(factory.DjangoModelFactory):
         if obj is None:
             obj = PresetFactory()
         return 'http://testserver' + reverse('deployment-preset-detail', kwargs={'uuid': obj.uuid.hex})
-
-
-class PresetItemFactory(factory.DjangoModelFactory):
-    class Meta(object):
-        model = models.PresetItem
-
-    default_price_list_item = factory.SubFactory(DefaultPriceListItemFactory)
