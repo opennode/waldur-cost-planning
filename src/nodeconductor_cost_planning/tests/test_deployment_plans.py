@@ -148,3 +148,28 @@ class DeploymentPlanDeleteTest(test.APITransactionTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(models.DeploymentPlan.objects.filter(pk=self.plan.pk).exists())
+
+
+@ddt
+class DeploymentPlanEvaluateTest(test.APITransactionTestCase):
+
+    def setUp(self):
+        self.fixture = fixtures.CostPlanningFixture()
+        self.plan = self.fixture.deployment_plan
+        self.url = factories.DeploymentPlanFactory.get_url(self.plan, action='evaluate')
+
+    @data('staff', 'global_support', 'owner')
+    def test_user_with_permission_can_evaluate_deployment_plan(self, user):
+        self.client.force_authenticate(getattr(self.fixture, user))
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @data('admin', 'manager')
+    def test_user_without_permission_cannot_eveluate_deployment_plan(self, user):
+        self.client.force_authenticate(getattr(self.fixture, user))
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

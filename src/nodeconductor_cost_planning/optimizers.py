@@ -1,6 +1,7 @@
-""" This module contains optimizers - objects, that calculates the cheapest price for deployment plans """
+""" This module calculates the cheapest price for deployment plans. """
 
 from nodeconductor.structure import models as structure_models
+from nodeconductor_openstack.openstack import apps as openstack_apps
 
 
 def get_filtered_services(deployment_plan):
@@ -39,8 +40,8 @@ class OptimizedOpenStack(OptimizedService):
         self.package_template = package_template
 
 
-class Optimizer(object):
-    """ Abstract. Descendants should define best strategy for deployment plan. """
+class Strategy(object):
+    """ Abstract. Defines how get the cheapest services setups for deployment plan. """
 
     def __init__(self, deployment_plan):
         self.deployment_plan = deployment_plan
@@ -50,14 +51,22 @@ class Optimizer(object):
         raise NotImplementedError()
 
 
-class SingleServiceOptimizer(Optimizer):
+class SingleServiceStrategy(Strategy):
     """ Optimize deployment plan for each service separately and return list
         of all available variants.
     """
+    _registry = {}
+
+    @classmethod
+    def register(cls, service_type, optimizer):
+        """ Register service optimizer """
+        cls._registry[service_type] = optimizer
+
     def _get_optimized_service(self, service):
-        from nodeconductor_openstack.openstack.apps import OpenStackConfig
-        if service.settings.type == OpenStackConfig.service_name:
-            return get_optimized_openstack(self.deployment_plan, service)
+        optimizer_class = self._registry.get(service.settings.type)
+        if optimizer_class:
+            optimizer = optimizer_class(self.deployment_plan, service)
+            return optimizer.optimize()
 
     def get_optimized(self):
         optimized = []
@@ -68,27 +77,45 @@ class SingleServiceOptimizer(Optimizer):
         return optimized
 
 
-def get_optimized_openstack(deployment_plan, service):
-    """ Find package template that suits deployment plan and has minimal price.
-        Return None if such package template doesn't exist.
+class Optimizer(object):
+    """ Abstract. Descendant should define how to get the cheapest setup for a
+        particular service.
     """
-    from nodeconductor_assembly_waldur.packages.models import PackageTemplate, PackageComponent
-    requirements = deployment_plan.get_requirements()
-    # Step 1. Find suitable templates.
-    templates = PackageTemplate.objects.filter(service_settings=service.settings).prefetch_related('components')
-    suitable_templates = []
-    for template in templates:
-        components = {c.type: c.amount for c in template.components.all()}
-        is_suitable = (
-            components[PackageComponent.Types.RAM] >= requirements['ram'] and
-            components[PackageComponent.Types.STORAGE] >= requirements['storage'] and
-            components[PackageComponent.Types.CORES] >= requirements['cores']
-        )
-        if is_suitable:
-            suitable_templates.append(template)
-    # Step 2. Find the cheapest template.
-    if not suitable_templates:
-        # return empty optimized service if there is no suitable templates
-        return OptimizedOpenStack(service, price=None, package_template=None)
-    cheapest_template = min(suitable_templates, key=lambda t: t.price)
-    return OptimizedOpenStack(service, cheapest_template.price, cheapest_template)
+    def __init__(self, deployment_plan, service):
+        self.service = service
+        self.deployment_plan = deployment_plan
+
+    def optimize(self):
+        """ Return the cheapest setup as Optimized object """
+        raise NotImplementedError()
+
+
+class OpenStackOptimizer(Optimizer):
+    """ Find the cheapest package template for OpenStack service """
+
+    def optimize(self):
+        # XXX: This import creates cyclic dependency with assembly module
+        from nodeconductor_assembly_waldur.packages.models import PackageTemplate, PackageComponent
+        requirements = self.deployment_plan.get_requirements()
+        # Step 1. Find suitable templates.
+        templates = PackageTemplate.objects.filter(
+            service_settings=self.service.settings).prefetch_related('components')
+        suitable_templates = []
+        for template in templates:
+            components = {c.type: c.amount for c in template.components.all()}
+            is_suitable = (
+                components[PackageComponent.Types.RAM] >= requirements['ram'] and
+                components[PackageComponent.Types.STORAGE] >= requirements['storage'] and
+                components[PackageComponent.Types.CORES] >= requirements['cores']
+            )
+            if is_suitable:
+                suitable_templates.append(template)
+        # Step 2. Find the cheapest template.
+        if not suitable_templates:
+            # return empty optimized service if there is no suitable templates
+            return OptimizedOpenStack(self.service, price=None, package_template=None)
+        cheapest_template = min(suitable_templates, key=lambda t: t.price)
+        return OptimizedOpenStack(self.service, cheapest_template.price, cheapest_template)
+
+
+SingleServiceStrategy.register(openstack_apps.OpenStackConfig.service_name, OpenStackOptimizer)

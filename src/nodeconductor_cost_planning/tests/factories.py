@@ -20,8 +20,9 @@ class DeploymentPlanFactory(factory.DjangoModelFactory):
         return 'http://testserver' + reverse('deployment-plan-list')
 
     @classmethod
-    def get_url(cls, obj):
-        return 'http://testserver' + reverse('deployment-plan-detail', kwargs={'uuid': obj.uuid.hex})
+    def get_url(cls, obj, action=None):
+        url = 'http://testserver' + reverse('deployment-plan-detail', kwargs={'uuid': obj.uuid.hex})
+        return url if not action else url + action + '/'
 
 
 class CategoryFactory(factory.DjangoModelFactory):

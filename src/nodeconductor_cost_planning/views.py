@@ -91,8 +91,8 @@ class DeploymentPlanViewSet(core_views.ActionsViewSet):
 
     @decorators.detail_route(methods=['GET'])
     def evaluate(self, request, *args, **kwargs):
-        optimizer = optimizers.SingleServiceOptimizer(self.get_object())
-        optimized_services = optimizer.get_optimized()
+        strategy = optimizers.SingleServiceStrategy(self.get_object())
+        optimized_services = strategy.get_optimized()
         serializer = self.get_serializer(optimized_services, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
