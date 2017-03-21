@@ -10,6 +10,7 @@ from . import models
 
 class PresetSerializer(serializers.HyperlinkedModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
+    variant = serializers.ReadOnlyField(source='get_variant_display')
 
     class Meta:
         model = models.Preset

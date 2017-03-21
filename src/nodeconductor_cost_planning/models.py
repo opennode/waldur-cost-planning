@@ -130,6 +130,9 @@ class Preset(core_models.UuidMixin, core_models.NameMixin):
     cores = models.PositiveIntegerField(default=0, help_text='Preset cores count.')
     storage = models.PositiveIntegerField(default=0, help_text='Preset storage amount in MB.')
 
+    def get_variant_display(self):
+        return dict(self.VARIANTS)[self.variant]
+
     def __str__(self):
         return '%s %s %s' % (self.variant, self.name, self.category)
 
