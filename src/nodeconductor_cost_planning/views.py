@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, reverse, decorators, response, status
+from rest_framework import viewsets, permissions, decorators, response, status
 from rest_framework.filters import DjangoFilterBackend
 
 from nodeconductor.core import views as core_views
