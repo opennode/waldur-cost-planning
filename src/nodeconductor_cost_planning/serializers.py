@@ -55,11 +55,11 @@ class BaseDeploymentPlanSerializer(core_serializers.AugmentedSerializerMixin, se
 
     class Meta:
         model = models.DeploymentPlan
-        fields = ('url', 'uuid', 'name', 'customer', 'items', 'certifications')
-        protected_fields = ('customer',)
+        fields = ('url', 'uuid', 'name', 'project', 'items', 'certifications')
+        protected_fields = ('project',)
         extra_kwargs = {
             'url': {'lookup_field': 'uuid'},
-            'customer': {'lookup_field': 'uuid'},
+            'project': {'lookup_field': 'uuid'},
         }
 
 
@@ -70,9 +70,9 @@ class DeploymentPlanSerializer(BaseDeploymentPlanSerializer):
 class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
     items = NestedDeploymentPlanItemSerializer(many=True, required=False)
 
-    def validate_customer(self, customer):
-        structure_permissions.is_owner(self.context['request'], self.context['view'], customer)
-        return customer
+    def validate_project(self, project):
+        structure_permissions.is_administrator(self.context['request'], self.context['view'], project)
+        return project
 
     def create(self, validated_data):
         items = validated_data.pop('items', [])

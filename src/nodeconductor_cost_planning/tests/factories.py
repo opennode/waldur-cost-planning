@@ -13,7 +13,7 @@ class DeploymentPlanFactory(factory.DjangoModelFactory):
         model = models.DeploymentPlan
 
     name = factory.Sequence(lambda n: 'plan%s' % n)
-    customer = factory.SubFactory(structure_factories.CustomerFactory)
+    project = factory.SubFactory(structure_factories.ProjectFactory)
 
     @classmethod
     def get_list_url(cls):

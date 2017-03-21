@@ -32,15 +32,14 @@ class DeploymentPlan(core_models.UuidMixin, core_models.NameMixin, TimeStampedMo
     Deployment plan contains list of plan items.
     """
     class Permissions(object):
-        customer_path = 'customer'
+        customer_path = 'project__customer'
+        project_path = 'project'
 
     class Meta:
         ordering = ['-created']
 
-    customer = models.ForeignKey(structure_models.Customer, related_name='+')
+    project = models.ForeignKey(structure_models.Project, related_name='+')
     certifications = models.ManyToManyField(structure_models.ServiceCertification, blank=True)
-    email_to = models.EmailField(blank=True)
-    pdf = models.FileField(upload_to='deployment_plans', blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -61,6 +60,9 @@ class DeploymentPlan(core_models.UuidMixin, core_models.NameMixin, TimeStampedMo
             requirements['cores'] += item.preset.cores * item.quantity
             requirements['storage'] += item.preset.storage * item.quantity
         return requirements
+
+    def get_required_certifications(self):
+        return set(list(self.certifications.all()) + list(self.project.certifications.all()))
 
 
 @python_2_unicode_compatible

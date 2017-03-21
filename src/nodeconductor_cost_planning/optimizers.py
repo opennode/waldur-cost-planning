@@ -7,11 +7,11 @@ from nodeconductor_openstack.openstack import apps as openstack_apps
 def get_filtered_services(deployment_plan):
     """ Get services that fits deployment plan requirements """
     service_models = structure_models.Service.get_all_models()
-    deployment_plan_certifications = deployment_plan.certifications.all()
+    deployment_plan_certifications = deployment_plan.get_required_certifications()
     for model in service_models:
         services = (
             model.objects
-            .filter(customer=deployment_plan.customer)
+            .filter(projects=deployment_plan.project)
             .select_related('settings')
             .prefetch_related('settings__certifications')
         )

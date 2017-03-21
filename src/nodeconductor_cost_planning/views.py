@@ -13,7 +13,7 @@ class DeploymentPlanViewSet(core_views.ActionsViewSet):
     lookup_field = 'uuid'
     filter_backends = (structure_filters.GenericRoleFilter, DjangoFilterBackend)
     filter_class = filters.DeploymentPlanFilter
-    unsafe_methods_permissions = [structure_permissions.is_owner]
+    unsafe_methods_permissions = [structure_permissions.is_administrator]
 
     def retrieve(self, request, *args, **kwargs):
         """

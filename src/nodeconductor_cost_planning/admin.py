@@ -28,7 +28,7 @@ class DeploymentPlanItem(admin.TabularInline):
 class DeploymentPlanAdmin(admin.ModelAdmin):
     inlines = (DeploymentPlanItem,)
     search_fields = ('name',)
-    list_display = ('name', 'customer')
+    list_display = ('name', 'project')
 
 
 admin.site.register(models.Category, CategoryAdmin)
