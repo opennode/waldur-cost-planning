@@ -13,7 +13,7 @@ class PresetSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.Preset
-        fields = ('url', 'uuid', 'name', 'category', 'ram', 'cores', 'storage')
+        fields = ('url', 'uuid', 'name', 'category', 'variant', 'ram', 'cores', 'storage')
         extra_kwargs = {
             'url': {'lookup_field': 'uuid', 'view_name': 'deployment-preset-detail'},
         }

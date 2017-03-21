@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, reverse, decorators, serializers as rf_serializers, response, status
+from rest_framework import viewsets, permissions, reverse, decorators, response, status
 from rest_framework.filters import DjangoFilterBackend
 
 from nodeconductor.core import views as core_views
@@ -96,7 +96,6 @@ class DeploymentPlanViewSet(core_views.ActionsViewSet):
         serializer = self.get_serializer(optimized_services, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
-    evaluate_methods_permissions = [structure_permissions.is_owner]
     evaluate_serializer_class = serializers.OptimizedServiceSummarySerializer
 
 
