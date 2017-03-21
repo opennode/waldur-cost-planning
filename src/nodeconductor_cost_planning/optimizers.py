@@ -3,43 +3,92 @@
 from nodeconductor.structure import models as structure_models
 
 
-class SingleServiceOptimizer(object):
-    """ Optimize deployment plan for each service separately """
+def get_filtered_services(deployment_plan):
+    """ Get services that fits deployment plan requirements """
+    service_models = structure_models.Service.get_all_models()
+    deployment_plan_certifications = deployment_plan.certifications.all()
+    for model in service_models:
+        services = (
+            model.objects
+            .filter(customer=deployment_plan.customer)
+            .select_related('settings')
+            .prefetch_related('settings__certifications')
+        )
+        for service in services:
+            if set(service.settings.certifications.all()).issuperset(deployment_plan_certifications):
+                yield service
+
+
+class OptimizedService(object):
+    """ Abstract object that represents the best choice for a particular service.
+
+        Each descendant should define how to reach the best choice.
+        Optimized objects should not contain any logic, just define data
+        structures.
+    """
+    def __init__(self, service, price):
+        self.service = service
+        self.price = price
+
+
+class OptimizedOpenStack(OptimizedService):
+    """ Defines package template with the best price for OpenStack service """
+
+    def __init__(self, service, price, package_template):
+        super(OptimizedOpenStack, self).__init__(service, price)
+        self.package_template = package_template
+
+
+class Optimizer(object):
+    """ Abstract. Descendants should define best strategy for deployment plan. """
+
     def __init__(self, deployment_plan):
-        self.plan = deployment_plan
+        self.deployment_plan = deployment_plan
 
-    def _get_valid_service_settings(self):
-        """ Return all services that are valid for deployment plan """
-        # TODO: too many queries to DB. Should be optimized.
-        service_models = structure_models.Service.get_all_models()
-        service_settings = set()
-        for model in service_models:
-            for service in model.objects.filter(customer=self.plan.customer):
-                service_settings.add(service.settings)
-        return [settings for settings in service_settings
-                if set(settings.certifications.all()).issuperset(self.plan.certifications.all())]
-
-    def get_optimized_service_settings(self):
-        optimized_service_settings = []
-        service_settings = self._get_valid_service_settings()
-
-        for settings in service_settings:
-            if settings.type != 'OpenStack':
-                continue
-            optimized_service_settings.append(OptimizedOpenStackSettings(settings, self.plan))
-        return optimized_service_settings
+    def get_optimized(self):
+        """ Return list of OptimizedService objects """
+        raise NotImplementedError()
 
 
-class OptimizedOpenStackSettings(object):
+class SingleServiceOptimizer(Optimizer):
+    """ Optimize deployment plan for each service separately and return list
+        of all available variants.
+    """
+    def _get_optimized_service(self, service):
+        from nodeconductor_openstack.openstack.apps import OpenStackConfig
+        if service.settings.type == OpenStackConfig.service_name:
+            return get_optimized_openstack(self.deployment_plan, service)
 
-    def __init__(self, service_settings, deployment_plan):
-        self.settings = service_settings
-        self.plan = deployment_plan
-        self.package_templates = self.get_best_package_templates()
+    def get_optimized(self):
+        optimized = []
+        for service in get_filtered_services(self.deployment_plan):
+            optimized_service = self._get_optimized_service(service)
+            if optimized_service:
+                optimized.append(optimized_service)
+        return optimized
 
-    def get_best_package_templates(self):
-        from nodeconductor_assembly_waldur.packages.models import PackageTemplate
-        return [{
-            'template': PackageTemplate.objects.filter(service_settings=self.settings).first(),
-            'quantity': 2,
-        }]
+
+def get_optimized_openstack(deployment_plan, service):
+    """ Find package template that suits deployment plan and has minimal price.
+        Return None if such package template doesn't exist.
+    """
+    from nodeconductor_assembly_waldur.packages.models import PackageTemplate, PackageComponent
+    requirements = deployment_plan.get_requirements()
+    # Step 1. Find suitable templates.
+    templates = PackageTemplate.objects.filter(service_settings=service.settings).prefetch_related('components')
+    suitable_templates = []
+    for template in templates:
+        components = {c.type: c.amount for c in template.components.all()}
+        is_suitable = (
+            components[PackageComponent.Types.RAM] >= requirements['ram'] and
+            components[PackageComponent.Types.STORAGE] >= requirements['storage'] and
+            components[PackageComponent.Types.CORES] >= requirements['cores']
+        )
+        if is_suitable:
+            suitable_templates.append(template)
+    # Step 2. Find the cheapest template.
+    if not suitable_templates:
+        # return empty optimized service if there is no suitable templates
+        return OptimizedOpenStack(service, price=None, package_template=None)
+    cheapest_template = min(suitable_templates, key=lambda t: t.price)
+    return OptimizedOpenStack(service, cheapest_template.price, cheapest_template)

@@ -49,6 +49,19 @@ class DeploymentPlan(core_models.UuidMixin, core_models.NameMixin, TimeStampedMo
     def get_url_name(cls):
         return 'deployment-plan'
 
+    def get_requirements(self):
+        """ Return how many ram, cores and storage are required for plan """
+        requirements = {
+            'ram': 0,
+            'cores': 0,
+            'storage': 0,
+        }
+        for item in self.items.all():
+            requirements['ram'] += item.preset.ram * item.quantity
+            requirements['cores'] += item.preset.cores * item.quantity
+            requirements['storage'] += item.preset.storage * item.quantity
+        return requirements
+
 
 @python_2_unicode_compatible
 class DeploymentPlanItem(models.Model):

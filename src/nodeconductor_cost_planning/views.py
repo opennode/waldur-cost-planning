@@ -91,25 +91,13 @@ class DeploymentPlanViewSet(core_views.ActionsViewSet):
 
     @decorators.detail_route(methods=['GET'])
     def evaluate(self, request, *args, **kwargs):
-        # XXX: This should be moved to serializers
         optimizer = optimizers.SingleServiceOptimizer(self.get_object())
-        serialized = []
-        for optimized_service_settings in optimizer.get_optimized_service_settings():
-            serialized.append({
-                'service_settings_name': optimized_service_settings.settings.name,
-                'service_settings': reverse.reverse(
-                    'servicesettings-detail',
-                    kwargs={'uuid': optimized_service_settings.settings.uuid},
-                    request=request),
-                'package_templates': [
-                    {'quantity': pt['quantity'], 'name': pt['template'].name, 'price': pt['template'].monthly_price}
-                    for pt in optimized_service_settings.package_templates
-                ]
-            })
-        return response.Response(serialized, status=status.HTTP_200_OK)
+        optimized_services = optimizer.get_optimized()
+        serializer = self.get_serializer(optimized_services, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     evaluate_methods_permissions = [structure_permissions.is_owner]
-    evaluate_serializer_class = rf_serializers.Serializer
+    evaluate_serializer_class = serializers.OptimizedServiceSummarySerializer
 
 
 class PresetViewSet(viewsets.ReadOnlyModelViewSet):

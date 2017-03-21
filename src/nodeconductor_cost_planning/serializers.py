@@ -115,3 +115,47 @@ class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
                 plan.items.filter(preset_id=item_id).update(quantity=new_map[item_id])
 
         return plan
+
+
+class OptimizedServiceSummarySerializer(serializers.Serializer):
+    """ Serializer that renders each instance with its own specific serializer """
+
+    @classmethod
+    def get_serializer(cls, service_type):
+        from nodeconductor_openstack.openstack.apps import OpenStackConfig
+        serializers = {
+            OpenStackConfig.service_name: OptimizedOpenStackSerializer,
+        }
+        return serializers.get(service_type, OptimizedServiceSerializer)
+
+    def to_representation(self, instance):
+        serializer = self.get_serializer(instance.service.settings.type)
+        return serializer(instance, context=self.context).data
+
+
+class OptimizedServiceSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=22, decimal_places=10)
+    service_settings = serializers.HyperlinkedRelatedField(
+        source='service.settings',
+        view_name='servicesettings-detail',
+        lookup_field='uuid',
+        read_only=True,
+    )
+    service_settings_name = serializers.ReadOnlyField(source='service.settings.name')
+    service_settings_type = serializers.ReadOnlyField(source='service.settings.type')
+
+
+class OptimizedOpenStackSerializer(OptimizedServiceSerializer):
+    service = serializers.HyperlinkedRelatedField(
+        view_name='openstack-detail',
+        lookup_field='uuid',
+        read_only=True,
+    )
+    package_template = serializers.HyperlinkedRelatedField(
+        view_name='package-template-detail',
+        lookup_field='uuid',
+        read_only=True,
+    )
+    package_template_name = serializers.ReadOnlyField(source='package_template.name')
+    package_template_description = serializers.ReadOnlyField(source='package_template.description')
+    package_template_category = serializers.ReadOnlyField(source='package_template.category')
