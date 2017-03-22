@@ -5,7 +5,8 @@ from rest_framework import serializers
 
 from nodeconductor.core import serializers as core_serializers
 from nodeconductor.structure import permissions as structure_permissions, models as structure_models
-from . import models
+
+from . import models, register
 
 
 class PresetSerializer(serializers.HyperlinkedModelSerializer):
@@ -123,11 +124,7 @@ class OptimizedServiceSummarySerializer(serializers.Serializer):
 
     @classmethod
     def get_serializer(cls, service_type):
-        from nodeconductor_openstack.openstack.apps import OpenStackConfig
-        serializers = {
-            OpenStackConfig.service_name: OptimizedOpenStackSerializer,
-        }
-        return serializers.get(service_type, OptimizedServiceSerializer)
+        return register.Register.get_serilizer(service_type) or OptimizedServiceSerializer
 
     def to_representation(self, instance):
         serializer = self.get_serializer(instance.service.settings.type)
@@ -144,19 +141,3 @@ class OptimizedServiceSerializer(serializers.Serializer):
     )
     service_settings_name = serializers.ReadOnlyField(source='service.settings.name')
     service_settings_type = serializers.ReadOnlyField(source='service.settings.type')
-
-
-class OptimizedOpenStackSerializer(OptimizedServiceSerializer):
-    service = serializers.HyperlinkedRelatedField(
-        view_name='openstack-detail',
-        lookup_field='uuid',
-        read_only=True,
-    )
-    package_template = serializers.HyperlinkedRelatedField(
-        view_name='package-template-detail',
-        lookup_field='uuid',
-        read_only=True,
-    )
-    package_template_name = serializers.ReadOnlyField(source='package_template.name')
-    package_template_description = serializers.ReadOnlyField(source='package_template.description')
-    package_template_category = serializers.ReadOnlyField(source='package_template.category')
