@@ -1,4 +1,6 @@
 """ Defines how to optimize OpenStack packages """
+import collections
+
 from rest_framework import serializers as rf_serializers
 
 from nodeconductor_openstack.openstack import apps as openstack_apps
@@ -6,12 +8,8 @@ from nodeconductor_openstack.openstack import apps as openstack_apps
 from .. import optimizers, register, serializers
 
 
-class OptimizedOpenStack(optimizers.OptimizedService):
-    """ Defines package template with the best price for OpenStack service """
-
-    def __init__(self, service, price, package_template):
-        super(OptimizedOpenStack, self).__init__(service, price)
-        self.package_template = package_template
+OptimizedOpenStack = collections.namedtuple(
+    'OptimizedOpenStack', field_names=optimizers.OptimizedService._fields + ('package_template',))
 
 
 class OpenStackOptimizer(optimizers.Optimizer):

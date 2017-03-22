@@ -1,4 +1,5 @@
 """ This module calculates the cheapest price for deployment plans. """
+import collections
 
 from nodeconductor.structure import models as structure_models
 
@@ -21,16 +22,8 @@ def get_filtered_services(deployment_plan):
                 yield service
 
 
-class OptimizedService(object):
-    """ Abstract object that represents the best choice for a particular service.
-
-        Each descendant should define how to reach the best choice.
-        Optimized objects should not contain any logic, just define data
-        structures.
-    """
-    def __init__(self, service, price):
-        self.service = service
-        self.price = price
+# Abstract object that represents the best choice for a particular service.
+OptimizedService = collections.namedtuple('OptimizedService', ['service', 'price'])
 
 
 class Strategy(object):
