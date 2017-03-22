@@ -51,14 +51,13 @@ class OptimizedOpenStackSerializer(serializers.OptimizedServiceSerializer):
         lookup_field='uuid',
         read_only=True,
     )
-    package_template = rf_serializers.HyperlinkedRelatedField(
-        view_name='package-template-detail',
-        lookup_field='uuid',
-        read_only=True,
-    )
-    package_template_name = rf_serializers.ReadOnlyField(source='package_template.name')
-    package_template_description = rf_serializers.ReadOnlyField(source='package_template.description')
-    package_template_category = rf_serializers.ReadOnlyField(source='package_template.category')
+
+    def get_fields(self):
+        fields = super(OptimizedOpenStackSerializer, self).get_fields()
+        # XXX: Initialize 'package_template' field here to avoid circular dependency with assembly
+        from nodeconductor_assembly_waldur.packages.serializers import PackageTemplateSerializer
+        fields['package_template'] = PackageTemplateSerializer(read_only=True)
+        return fields
 
 
 register.Register.register_serializer(openstack_apps.OpenStackConfig.service_name, OptimizedOpenStackSerializer)

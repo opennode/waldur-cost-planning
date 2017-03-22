@@ -72,5 +72,5 @@ class Optimizer(object):
         self.deployment_plan = deployment_plan
 
     def optimize(self):
-        """ Return the cheapest setup as Optimized object """
+        """ Return the cheapest setup as OptimizedService object """
         raise NotImplementedError()
