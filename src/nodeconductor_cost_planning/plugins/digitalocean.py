@@ -18,7 +18,7 @@ OptimizedDigitalOcean = optimizers.namedtuple_with_defaults(
 
 
 class DigitalOceanOptimizer(optimizers.Optimizer):
-    """ Find the cheapest package template for OpenStack service """
+    """ Find the cheapest Digital Ocean size for each preset """
 
     def optimize(self, deployment_plan, service):
         optimized_presets = []

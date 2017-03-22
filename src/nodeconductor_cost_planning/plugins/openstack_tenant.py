@@ -20,7 +20,7 @@ OptimizedOpenStackTenant = optimizers.namedtuple_with_defaults(
 
 
 class OpenStackTenantOptimizer(optimizers.Optimizer):
-    """ Find the cheapest package template for OpenStack service """
+    """ Find the cheapest OpenStackTenant flavor for each preset. """
 
     def _get_cheapest_flavor(self, suitable_flavors):
         # TODO
