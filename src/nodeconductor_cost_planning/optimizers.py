@@ -1,45 +1,69 @@
-""" This module contains optimizers - objects, that calculates the cheapest price for deployment plans """
+""" This module calculates the cheapest price for deployment plans. """
+import collections
 
 from nodeconductor.structure import models as structure_models
 
+from . import register
 
-class SingleServiceOptimizer(object):
-    """ Optimize deployment plan for each service separately """
+
+def get_filtered_services(deployment_plan):
+    """ Get services that fits deployment plan requirements """
+    service_models = structure_models.Service.get_all_models()
+    deployment_plan_certifications = deployment_plan.get_required_certifications()
+    for model in service_models:
+        services = (
+            model.objects
+            .filter(projects=deployment_plan.project)
+            .select_related('settings')
+            .prefetch_related('settings__certifications')
+        )
+        for service in services:
+            if set(service.settings.certifications.all()).issuperset(deployment_plan_certifications):
+                yield service
+
+
+# Abstract object that represents the best choice for a particular service.
+OptimizedService = collections.namedtuple('OptimizedService', ['service', 'price'])
+
+
+class Strategy(object):
+    """ Abstract. Defines how get the cheapest services setups for deployment plan. """
+
     def __init__(self, deployment_plan):
-        self.plan = deployment_plan
+        self.deployment_plan = deployment_plan
 
-    def _get_valid_service_settings(self):
-        """ Return all services that are valid for deployment plan """
-        # TODO: too many queries to DB. Should be optimized.
-        service_models = structure_models.Service.get_all_models()
-        service_settings = set()
-        for model in service_models:
-            for service in model.objects.filter(customer=self.plan.customer):
-                service_settings.add(service.settings)
-        return [settings for settings in service_settings
-                if set(settings.certifications.all()).issuperset(self.plan.certifications.all())]
-
-    def get_optimized_service_settings(self):
-        optimized_service_settings = []
-        service_settings = self._get_valid_service_settings()
-
-        for settings in service_settings:
-            if settings.type != 'OpenStack':
-                continue
-            optimized_service_settings.append(OptimizedOpenStackSettings(settings, self.plan))
-        return optimized_service_settings
+    def get_optimized(self):
+        """ Return list of OptimizedService objects """
+        raise NotImplementedError()
 
 
-class OptimizedOpenStackSettings(object):
+class SingleServiceStrategy(Strategy):
+    """ Optimize deployment plan for each service separately and return list
+        of all available variants.
+    """
+    def _get_optimized_service(self, service):
+        optimizer_class = register.Register.get_optimizer(service.settings.type)
+        if optimizer_class:
+            optimizer = optimizer_class(self.deployment_plan, service)
+            return optimizer.optimize()
 
-    def __init__(self, service_settings, deployment_plan):
-        self.settings = service_settings
-        self.plan = deployment_plan
-        self.package_templates = self.get_best_package_templates()
+    def get_optimized(self):
+        optimized = []
+        for service in get_filtered_services(self.deployment_plan):
+            optimized_service = self._get_optimized_service(service)
+            if optimized_service:
+                optimized.append(optimized_service)
+        return optimized
 
-    def get_best_package_templates(self):
-        from nodeconductor_assembly_waldur.packages.models import PackageTemplate
-        return [{
-            'template': PackageTemplate.objects.filter(service_settings=self.settings).first(),
-            'quantity': 2,
-        }]
+
+class Optimizer(object):
+    """ Abstract. Descendant should define how to get the cheapest setup for a
+        particular service.
+    """
+    def __init__(self, deployment_plan, service):
+        self.service = service
+        self.deployment_plan = deployment_plan
+
+    def optimize(self):
+        """ Return the cheapest setup as OptimizedService object """
+        raise NotImplementedError()

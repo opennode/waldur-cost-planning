@@ -13,15 +13,16 @@ class DeploymentPlanFactory(factory.DjangoModelFactory):
         model = models.DeploymentPlan
 
     name = factory.Sequence(lambda n: 'plan%s' % n)
-    customer = factory.SubFactory(structure_factories.CustomerFactory)
+    project = factory.SubFactory(structure_factories.ProjectFactory)
 
     @classmethod
     def get_list_url(cls):
         return 'http://testserver' + reverse('deployment-plan-list')
 
     @classmethod
-    def get_url(cls, obj):
-        return 'http://testserver' + reverse('deployment-plan-detail', kwargs={'uuid': obj.uuid.hex})
+    def get_url(cls, obj, action=None):
+        url = 'http://testserver' + reverse('deployment-plan-detail', kwargs={'uuid': obj.uuid.hex})
+        return url if not action else url + action + '/'
 
 
 class CategoryFactory(factory.DjangoModelFactory):

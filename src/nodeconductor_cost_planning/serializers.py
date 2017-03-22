@@ -5,15 +5,17 @@ from rest_framework import serializers
 
 from nodeconductor.core import serializers as core_serializers
 from nodeconductor.structure import permissions as structure_permissions, models as structure_models
-from . import models
+
+from . import models, register
 
 
 class PresetSerializer(serializers.HyperlinkedModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
+    variant = serializers.ReadOnlyField(source='get_variant_display')
 
     class Meta:
         model = models.Preset
-        fields = ('url', 'uuid', 'name', 'category', 'ram', 'cores', 'storage')
+        fields = ('url', 'uuid', 'name', 'category', 'variant', 'ram', 'cores', 'storage')
         extra_kwargs = {
             'url': {'lookup_field': 'uuid', 'view_name': 'deployment-preset-detail'},
         }
@@ -54,11 +56,11 @@ class BaseDeploymentPlanSerializer(core_serializers.AugmentedSerializerMixin, se
 
     class Meta:
         model = models.DeploymentPlan
-        fields = ('url', 'uuid', 'name', 'customer', 'items', 'certifications')
-        protected_fields = ('customer',)
+        fields = ('url', 'uuid', 'name', 'project', 'items', 'certifications')
+        protected_fields = ('project',)
         extra_kwargs = {
             'url': {'lookup_field': 'uuid'},
-            'customer': {'lookup_field': 'uuid'},
+            'project': {'lookup_field': 'uuid'},
         }
 
 
@@ -69,9 +71,9 @@ class DeploymentPlanSerializer(BaseDeploymentPlanSerializer):
 class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
     items = NestedDeploymentPlanItemSerializer(many=True, required=False)
 
-    def validate_customer(self, customer):
-        structure_permissions.is_owner(self.context['request'], self.context['view'], customer)
-        return customer
+    def validate_project(self, project):
+        structure_permissions.is_administrator(self.context['request'], self.context['view'], project)
+        return project
 
     def create(self, validated_data):
         items = validated_data.pop('items', [])
@@ -115,3 +117,27 @@ class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
                 plan.items.filter(preset_id=item_id).update(quantity=new_map[item_id])
 
         return plan
+
+
+class OptimizedServiceSummarySerializer(serializers.Serializer):
+    """ Serializer that renders each instance with its own specific serializer """
+
+    @classmethod
+    def get_serializer(cls, service_type):
+        return register.Register.get_serilizer(service_type) or OptimizedServiceSerializer
+
+    def to_representation(self, instance):
+        serializer = self.get_serializer(instance.service.settings.type)
+        return serializer(instance, context=self.context).data
+
+
+class OptimizedServiceSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=22, decimal_places=10)
+    service_settings = serializers.HyperlinkedRelatedField(
+        source='service.settings',
+        view_name='servicesettings-detail',
+        lookup_field='uuid',
+        read_only=True,
+    )
+    service_settings_name = serializers.ReadOnlyField(source='service.settings.name')
+    service_settings_type = serializers.ReadOnlyField(source='service.settings.type')
