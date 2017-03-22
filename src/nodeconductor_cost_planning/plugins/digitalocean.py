@@ -27,8 +27,8 @@ class DigitalOceanOptimizer(optimizers.Optimizer):
             preset = item.preset
             try:
                 size = do_models.Size.objects.filter(
-                    cores__gte=preset.cores, ram__gte=preset.ram, disk__gte=preset.storage).earliest('price')
-            except do_models.Size.DoesNotExist:
+                    cores__gte=preset.cores, ram__gte=preset.ram, disk__gte=preset.storage).order_by('price')[0]
+            except IndexError:
                 preset_as_str = '%s (cores: %s, ram %s MB, storage %s MB)' % (
                     preset.name, preset.cores, preset.ram, preset.storage)
                 raise optimizers.OptimizationError(
