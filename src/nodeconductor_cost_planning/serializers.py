@@ -123,11 +123,13 @@ class OptimizedServiceSummarySerializer(serializers.Serializer):
     """ Serializer that renders each instance with its own specific serializer """
 
     @classmethod
-    def get_serializer(cls, service_type):
-        return register.Register.get_serilizer(service_type) or OptimizedServiceSerializer
+    def get_serializer(cls, optimized_service):
+        if optimized_service.error_message:
+            return OptimizedServiceSerializer
+        return register.Register.get_serilizer(optimized_service.service.settings.type) or OptimizedServiceSerializer
 
     def to_representation(self, instance):
-        serializer = self.get_serializer(instance.service.settings.type)
+        serializer = self.get_serializer(instance)
         return serializer(instance, context=self.context).data
 
 
@@ -141,3 +143,4 @@ class OptimizedServiceSerializer(serializers.Serializer):
     )
     service_settings_name = serializers.ReadOnlyField(source='service.settings.name')
     service_settings_type = serializers.ReadOnlyField(source='service.settings.type')
+    error_message = serializers.ReadOnlyField()
