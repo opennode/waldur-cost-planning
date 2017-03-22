@@ -9,6 +9,7 @@ Source0: %{name}-%{version}.tar.gz
 
 Requires: nodeconductor >= 0.128.0
 Requires: nodeconductor-openstack >= 0.21.0
+Requires: nodeconductor-digitalocean >= 0.3.0
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
