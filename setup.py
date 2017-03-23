@@ -9,6 +9,7 @@ dev_requires = [
 install_requires = [
     'nodeconductor>=0.128.0',
     'nodeconductor_openstack>=0.21.0',
+    'nodeconductor_digitalocean>=0.3.0',
 ]
 
 setup(

@@ -22,8 +22,22 @@ def get_filtered_services(deployment_plan):
                 yield service
 
 
+# http://stackoverflow.com/questions/11351032/named-tuple-and-optional-keyword-arguments
+def namedtuple_with_defaults(typename, field_names, default_values=()):
+    T = collections.namedtuple(typename, field_names)
+    T.__new__.__defaults__ = (None,) * len(T._fields)
+    if isinstance(default_values, collections.Mapping):
+        prototype = T(**default_values)
+    else:
+        prototype = T(*default_values)
+    T.__new__.__defaults__ = tuple(prototype)
+    T._defaults = tuple(prototype)  # added for easier access
+    return T
+
+
 # Abstract object that represents the best choice for a particular service.
-OptimizedService = collections.namedtuple('OptimizedService', ['service', 'price'])
+OptimizedService = namedtuple_with_defaults(
+    'OptimizedService', ('service', 'price', 'error_message'), {'error_message': ''})
 
 
 class Strategy(object):
@@ -44,8 +58,11 @@ class SingleServiceStrategy(Strategy):
     def _get_optimized_service(self, service):
         optimizer_class = register.Register.get_optimizer(service.settings.type)
         if optimizer_class:
-            optimizer = optimizer_class(self.deployment_plan, service)
-            return optimizer.optimize()
+            optimizer = optimizer_class()
+            try:
+                return optimizer.optimize(self.deployment_plan, service)
+            except OptimizationError as e:
+                return OptimizedService(service=service, price=None, error_message=str(e))
 
     def get_optimized(self):
         optimized = []
@@ -56,14 +73,16 @@ class SingleServiceStrategy(Strategy):
         return optimized
 
 
+# Optimizer should raise this error if it is impossible to setup
+# deployment plan for service
+class OptimizationError(Exception):
+    pass
+
+
 class Optimizer(object):
     """ Abstract. Descendant should define how to get the cheapest setup for a
         particular service.
     """
-    def __init__(self, deployment_plan, service):
-        self.service = service
-        self.deployment_plan = deployment_plan
-
-    def optimize(self):
+    def optimize(self, deployment_plan, service):
         """ Return the cheapest setup as OptimizedService object """
         raise NotImplementedError()

@@ -1,6 +1,4 @@
 """ Defines how to optimize OpenStack packages """
-import collections
-
 from rest_framework import serializers as rf_serializers
 
 from nodeconductor_openstack.openstack import apps as openstack_apps
@@ -8,20 +6,23 @@ from nodeconductor_openstack.openstack import apps as openstack_apps
 from .. import optimizers, register, serializers
 
 
-OptimizedOpenStack = collections.namedtuple(
-    'OptimizedOpenStack', field_names=optimizers.OptimizedService._fields + ('package_template',))
+OptimizedOpenStack = optimizers.namedtuple_with_defaults(
+    'OptimizedOpenStack',
+    field_names=optimizers.OptimizedService._fields + ('package_template',),
+    default_values=optimizers.OptimizedService._defaults,
+)
 
 
 class OpenStackOptimizer(optimizers.Optimizer):
     """ Find the cheapest package template for OpenStack service """
 
-    def optimize(self):
+    def optimize(self, deployment_plan, service):
         # XXX: This import creates cyclic dependency with assembly module
         from nodeconductor_assembly_waldur.packages.models import PackageTemplate, PackageComponent
-        requirements = self.deployment_plan.get_requirements()
+        requirements = deployment_plan.get_requirements()
         # Step 1. Find suitable templates.
         templates = PackageTemplate.objects.filter(
-            service_settings=self.service.settings).prefetch_related('components')
+            service_settings=service.settings).prefetch_related('components')
         suitable_templates = []
         for template in templates:
             components = {c.type: c.amount for c in template.components.all()}
@@ -34,10 +35,9 @@ class OpenStackOptimizer(optimizers.Optimizer):
                 suitable_templates.append(template)
         # Step 2. Find the cheapest template.
         if not suitable_templates:
-            # return empty optimized service if there is no suitable templates
-            return OptimizedOpenStack(self.service, price=None, package_template=None)
+            raise optimizers.OptimizationError('There is no package template that can hold the deployment plan.')
         cheapest_template = min(suitable_templates, key=lambda t: t.price)
-        return OptimizedOpenStack(self.service, cheapest_template.price, cheapest_template)
+        return OptimizedOpenStack(service, cheapest_template.price, '', cheapest_template)
 
 
 register.Register.register_optimizer(openstack_apps.OpenStackConfig.service_name, OpenStackOptimizer)
