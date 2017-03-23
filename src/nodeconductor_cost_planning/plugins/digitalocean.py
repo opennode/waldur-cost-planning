@@ -3,7 +3,6 @@ import collections
 
 from rest_framework import serializers as rf_serializers
 
-from nodeconductor.core import utils as core_utils
 from nodeconductor_digitalocean import apps as do_apps, models as do_models, serializers as do_serializers
 
 from .. import optimizers, register, serializers
@@ -20,6 +19,7 @@ OptimizedDigitalOcean = optimizers.namedtuple_with_defaults(
 
 class DigitalOceanOptimizer(optimizers.Optimizer):
     """ Find the cheapest Digital Ocean size for each preset """
+    HOURS_IN_DAY = 24
 
     def optimize(self, deployment_plan, service):
         optimized_presets = []
@@ -38,9 +38,9 @@ class DigitalOceanOptimizer(optimizers.Optimizer):
                 preset=preset,
                 size=size,
                 quantity=item.quantity,
-                price=size.price * item.quantity * core_utils.hours_in_month(),
+                price=size.price * item.quantity * self.HOURS_IN_DAY,
             ))
-            price += size.price * item.quantity * core_utils.hours_in_month()
+            price += size.price * item.quantity * self.HOURS_IN_DAY
         return OptimizedDigitalOcean(price=price, service=service, optimized_presets=optimized_presets)
 
 

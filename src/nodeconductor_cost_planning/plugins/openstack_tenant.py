@@ -4,7 +4,6 @@ import collections
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers as rf_serializers
 
-from nodeconductor.core import utils as core_utils
 from nodeconductor.cost_tracking import models as cost_tracking_models
 from nodeconductor_openstack.openstack_tenant import (
     apps as ot_apps, models as ot_models, serializers as ot_serializers, cost_tracking as ot_cost_tracking)
@@ -25,6 +24,8 @@ OptimizedOpenStackTenant = optimizers.namedtuple_with_defaults(
 
 class OpenStackTenantOptimizer(optimizers.Optimizer):
     """ Find the cheapest OpenStackTenant flavor for each preset. """
+    HOURS_IN_DAY = 24
+
     def _get_service_price_item(self, service, resource_content_type, item_type, key):
         default_item = cost_tracking_models.DefaultPriceListItem.objects.get(
             resource_content_type=resource_content_type, item_type=item_type, key=key)
@@ -45,7 +46,7 @@ class OpenStackTenantOptimizer(optimizers.Optimizer):
             )
         except cost_tracking_models.DefaultPriceListItem.DoesNotExist:
             raise optimizers.OptimizationError('Price is not defined for flavor "%s".' % flavor.name)
-        return item.value * core_utils.hours_in_month()
+        return item.value * self.HOURS_IN_DAY
 
     def _get_cheapest_flavor(self, service, suitable_flavors):
         priced_flavors = [(flavor, self._get_flavor_price(service, flavor)) for flavor in suitable_flavors]
@@ -63,7 +64,7 @@ class OpenStackTenantOptimizer(optimizers.Optimizer):
             )
         except cost_tracking_models.DefaultPriceListItem.DoesNotExist:
             raise optimizers.OptimizationError('Storage price is not defined.')
-        return item.value * core_utils.hours_in_month()
+        return item.value * self.HOURS_IN_DAY
 
     def optimize(self, deployment_plan, service):
         optimized_presets = []
