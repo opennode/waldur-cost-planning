@@ -25,8 +25,17 @@ OptimizedOpenStackTenant = optimizers.namedtuple_with_defaults(
 
 class OpenStackTenantOptimizer(optimizers.Optimizer):
     """ Find the cheapest OpenStackTenant flavor for each preset. """
-    volume_content_type = ContentType.objects.get_for_model(ot_models.Volume)
-    instance_content_type = ContentType.objects.get_for_model(ot_models.Instance)
+    @property
+    def _instance_content_type(self):
+        if not hasattr(self.__class__, '_cached_instance_content_type'):
+            self.__class__._cached_instance_content_type = ContentType.objects.get_for_model(ot_models.Instance)
+        return getattr(self.__class__, '_cached_instance_content_type')
+
+    @property
+    def _volume_content_type(self):
+        if not hasattr(self.__class__, '_cached_volume_content_type'):
+            self.__class__._cached_volume_content_type = ContentType.objects.get_for_model(ot_models.Volume)
+        return getattr(self.__class__, '_cached_volume_content_type')
 
     def _get_service_price_item(self, service, resource_content_type, item_type, key):
         default_item = cost_tracking_models.DefaultPriceListItem.objects.get(
