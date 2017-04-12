@@ -30,7 +30,7 @@ class AWSOptimizer(optimizers.Optimizer):
         service_price_list_items = utils.get_service_price_list_items(service, aws_models.Instance)
         size_prices = {item.key: item.value for item in service_price_list_items
                        if item.item_type == aws_cost_tracking.InstanceStrategy.Types.FLAVOR}
-        return {size: size_prices.get(size.name, size.price) * self.HOURS_IN_DAY for size in sizes}
+        return {size: size_prices.get(size.backend_id, size.price) * self.HOURS_IN_DAY for size in sizes}
 
     def optimize(self, deployment_plan, service):
         optimized_presets = []
