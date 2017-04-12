@@ -25,7 +25,7 @@ class DigitalOceanOptimizer(optimizers.Optimizer):
     DAYS_IN_MONTH = 30
 
     def _get_size_prices(self, service):
-        """ Return dicti with items <size>: <size price> """
+        """ Return dictionary with items <size>: <size price> """
         sizes = do_models.Size.objects.all()
         service_price_list_items = utils.get_service_price_list_items(service, do_models.Droplet)
         size_prices = {item.key: item.value for item in service_price_list_items

@@ -25,7 +25,7 @@ class AWSOptimizer(optimizers.Optimizer):
     DAYS_IN_MONTH = 30
 
     def _get_size_prices(self, service):
-        """ Return dicti with items <size>: <size price> """
+        """ Return dictionary with items <size>: <size price> """
         sizes = aws_models.Size.objects.all()
         service_price_list_items = utils.get_service_price_list_items(service, aws_models.Instance)
         size_prices = {item.key: item.value for item in service_price_list_items
@@ -44,7 +44,7 @@ class AWSOptimizer(optimizers.Optimizer):
                 preset_as_str = '%s (cores: %s, ram %s MB, storage %s MB)' % (
                     preset.name, preset.cores, preset.ram, preset.storage)
                 raise optimizers.OptimizationError(
-                    'It is impossible to create a droplet for preset %s. It is too big.' % preset_as_str)
+                    'It is impossible to create a instance for preset %s. It is too big.' % preset_as_str)
             try:
                 size = min(sizes, key=lambda size: size_prices[size])
             except ValueError:
