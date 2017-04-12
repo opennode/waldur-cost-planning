@@ -5,7 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers as rf_serializers
 
 from nodeconductor.cost_tracking import models as cost_tracking_models
-from nodeconductor_digitalocean import apps as do_apps, models as do_models, serializers as do_serializers
+from nodeconductor_digitalocean import (
+    apps as do_apps, models as do_models, serializers as do_serializers, cost_tracking as do_cost_tracking)
 
 from .. import optimizers, register, serializers
 
@@ -37,8 +38,9 @@ class DigitalOceanOptimizer(optimizers.Optimizer):
     def _get_size_prices(self, service):
         """ Return dicti with items <size>: <size price> """
         sizes = do_models.Size.objects.all()
-        size_prices = {item.key: item.value for item in
-                       self._get_service_price_list_items(service, do_models.Droplet)}
+        service_price_list_items = self._get_service_price_list_items(service, do_models.Droplet)
+        size_prices = {item.key: item.value for item in service_price_list_items
+                       if item.type == do_cost_tracking.DropletStrategy.Types.FLAVOR}
         return {size: size_prices.get(size.name, size.price) * self.HOURS_IN_DAY for size in sizes}
 
     def optimize(self, deployment_plan, service):
