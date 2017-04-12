@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, decorators, response, status
+from rest_framework import viewsets, decorators, response, status
 from rest_framework.filters import DjangoFilterBackend
 
 from nodeconductor.core import views as core_views
@@ -103,4 +103,3 @@ class PresetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Preset.objects.all()
     serializer_class = serializers.PresetSerializer
     lookup_field = 'uuid'
-    permission_classes = (permissions.IsAuthenticated,)
