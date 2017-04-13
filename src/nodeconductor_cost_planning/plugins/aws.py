@@ -44,18 +44,18 @@ class AWSOptimizer(optimizers.Optimizer):
                 preset_as_str = '%s (cores: %s, ram %s MB, storage %s MB)' % (
                     preset.name, preset.cores, preset.ram, preset.storage)
                 raise optimizers.OptimizationError(
-                    'It is impossible to create a instance for preset %s. It is too big.' % preset_as_str)
+                    'It is impossible to create an instance for preset %s. It is too big.' % preset_as_str)
             try:
-                size = min(sizes, key=lambda size: size_prices[size])
-            except ValueError:
-                raise optimizers.OptimizationError('Price for size %s is not defined' % size.name)
+                optimal_size = min(sizes, key=lambda size: size_prices[size])
+            except KeyError:
+                raise optimizers.OptimizationError('Price for size %s is not defined.' % optimal_size.backend_id)
             optimized_presets.append(OptimizedPreset(
                 preset=preset,
-                size=size,
+                size=optimal_size,
                 quantity=item.quantity,
-                price=size_prices[size] * item.quantity,
+                price=size_prices[optimal_size] * item.quantity,
             ))
-            price += size_prices[size] * item.quantity
+            price += size_prices[optimal_size] * item.quantity
         return OptimizedAWS(price=price, service=service, optimized_presets=optimized_presets)
 
 
