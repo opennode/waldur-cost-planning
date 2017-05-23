@@ -7,10 +7,10 @@ License: MIT
 Url: http://nodeconductor.com
 Source0: %{name}-%{version}.tar.gz
 
-Requires: nodeconductor >= 0.134.0
-Requires: nodeconductor-openstack >= 0.21.0
-Requires: nodeconductor-digitalocean >= 0.3.0
-Requires: nodeconductor-aws >= 0.4.3
+Requires: nodeconductor >= 0.138.0
+Requires: nodeconductor-openstack >= 0.26.0
+Requires: nodeconductor-digitalocean >= 0.6.0
+Requires: nodeconductor-aws >= 0.7.0
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
