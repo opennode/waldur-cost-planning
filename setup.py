@@ -15,7 +15,7 @@ install_requires = [
 
 setup(
     name='nodeconductor-cost-planning',
-    version='0.3.0',
+    version='0.3.1',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://nodeconductor.com',
