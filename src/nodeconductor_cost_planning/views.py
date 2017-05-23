@@ -1,33 +1,19 @@
-from rest_framework import viewsets, permissions, exceptions
-from rest_framework.filters import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, decorators, response, status
 
-from nodeconductor.structure import filters as structure_filters
+from nodeconductor.core import views as core_views
+from nodeconductor.structure import filters as structure_filters, permissions as structure_permissions
 
-from . import models, serializers, filters
+from . import models, serializers, filters, optimizers
 
 
-class DeploymentPlanViewSet(viewsets.ModelViewSet):
+class DeploymentPlanViewSet(core_views.ActionsViewSet):
     queryset = models.DeploymentPlan.objects.all()
     serializer_class = serializers.DeploymentPlanSerializer
     lookup_field = 'uuid'
     filter_backends = (structure_filters.GenericRoleFilter, DjangoFilterBackend)
-    permission_classes = (permissions.IsAuthenticated, permissions.DjangoObjectPermissions)
     filter_class = filters.DeploymentPlanFilter
-
-    def get_serializer_class(self):
-        if self.action in ('create', 'update', 'partial_update'):
-            return serializers.DeploymentPlanCreateSerializer
-        return self.serializer_class
-
-    def perform_create(self, serializer):
-        """
-        Create new deployment plan
-        """
-        customer = serializer.validated_data['customer']
-        if not customer.has_user(self.request.user) and not self.request.user.is_staff:
-            raise exceptions.PermissionDenied()
-
-        super(DeploymentPlanViewSet, self).perform_create(serializer)
+    unsafe_methods_permissions = [structure_permissions.is_administrator]
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -53,14 +39,14 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
                             "uuid": "628cd853ba2a4ce7af5d4fff510b5bd2",
                             "name": "MySQL",
                             "category": "Databases",
-                            "variant": "Large"
+                            "variant": "Large",
+                            "ram": 2048,
+                            "cores": 2,
+                            "storage": 1024000
                         },
-                        "quantity": 1,
-                        "total_price": 182.23
+                        "quantity": 1
                     }
-                ],
-                "service": "http://example.com/api/azure/54121cd1cde24b73a1c194d74a305cd2/",
-                "total_price": 182.23
+                ]
             }
         """
         return super(DeploymentPlanViewSet, self).retrieve(request, *args, **kwargs)
@@ -80,7 +66,6 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
             {
                 "name": "WebApps",
                 "customer": "http://example.com/api/customers/2f8b4e0f101545508d52c7655d6386c8/",
-                "service": "http://example.com/api/azure/54121cd1cde24b73a1c194d74a305cd2/",
                 "items": [
                     {
                         "preset": "http://example.com/api/deployment-presets/2debb6d109954afaa03910ba1c6791a6/",
@@ -91,6 +76,8 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
         """
         return super(DeploymentPlanViewSet, self).create(request, *args, **kwargs)
 
+    create_serializer_class = serializers.DeploymentPlanCreateSerializer
+
     def update(self, request, *args, **kwargs):
         """
         Run **PUT** request against */api/deployment-plans/<uuid>/* to update deployment plan.
@@ -100,9 +87,19 @@ class DeploymentPlanViewSet(viewsets.ModelViewSet):
         """
         return super(DeploymentPlanViewSet, self).update(request, *args, **kwargs)
 
+    update_serializer_class = partial_update_serializer_class = serializers.DeploymentPlanCreateSerializer
+
+    @decorators.detail_route(methods=['GET'])
+    def evaluate(self, request, *args, **kwargs):
+        strategy = optimizers.SingleServiceStrategy(self.get_object())
+        optimized_services = strategy.get_optimized()
+        serializer = self.get_serializer(optimized_services, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    evaluate_serializer_class = serializers.OptimizedServiceSummarySerializer
+
 
 class PresetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Preset.objects.all()
     serializer_class = serializers.PresetSerializer
     lookup_field = 'uuid'
-    permission_classes = (permissions.IsAuthenticated,)

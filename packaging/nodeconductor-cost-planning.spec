@@ -1,15 +1,16 @@
 Name: nodeconductor-cost-planning
 Summary: NodeConductor cost planning plugin
 Group: Development/Libraries
-Version: 0.2.0
+Version: 0.3.0
 Release: 1.el7
 License: MIT
 Url: http://nodeconductor.com
 Source0: %{name}-%{version}.tar.gz
 
-Requires: nodeconductor >= 0.96.0
-Requires: python-lxml >= 3.2.0
-Requires: python-xhtml2pdf >= 0.0.6
+Requires: nodeconductor >= 0.138.0
+Requires: nodeconductor-openstack >= 0.26.0
+Requires: nodeconductor-digitalocean >= 0.6.0
+Requires: nodeconductor-aws >= 0.7.0
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -36,6 +37,9 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
+* Tue May 23 2017 Jenkins <jenkins@opennodecloud.com> - 0.3.0-1.el7
+- New upstream release
+
 * Sat Sep 17 2016 Jenkins <jenkins@opennodecloud.com> - 0.2.0-1.el7
 - New upstream release
 

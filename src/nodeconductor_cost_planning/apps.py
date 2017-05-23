@@ -6,4 +6,5 @@ class CostPlanningConfig(AppConfig):
     verbose_name = 'Cost planning'
 
     def ready(self):
-        pass
+        # import here to register openstack plugin.
+        from .plugins import openstack, digitalocean, openstack_tenant, aws

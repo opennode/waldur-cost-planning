@@ -7,14 +7,15 @@ dev_requires = [
 ]
 
 install_requires = [
-    'nodeconductor>=0.107.0',
-    'lxml>=3.2',
-    'xhtml2pdf>=0.0.6',
+    'nodeconductor>=0.138.0',
+    'nodeconductor_openstack>=0.26.0',
+    'nodeconductor_digitalocean>=0.6.0',
+    'nodeconductor_aws>=0.7.0',
 ]
 
 setup(
     name='nodeconductor-cost-planning',
-    version='0.2.0',
+    version='0.3.0',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://nodeconductor.com',

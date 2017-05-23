@@ -2,12 +2,11 @@ from __future__ import unicode_literals
 
 from django.db import transaction
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
-from nodeconductor.core.serializers import JSONField, AugmentedSerializerMixin, GenericRelatedField
-from nodeconductor.structure import SupportedServices
+from nodeconductor.core import serializers as core_serializers
+from nodeconductor.structure import permissions as structure_permissions, models as structure_models
 
-from . import models
+from . import models, register
 
 
 class PresetSerializer(serializers.HyperlinkedModelSerializer):
@@ -16,7 +15,7 @@ class PresetSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.Preset
-        fields = ('url', 'uuid', 'name', 'category', 'variant')
+        fields = ('url', 'uuid', 'name', 'category', 'variant', 'ram', 'cores', 'storage')
         extra_kwargs = {
             'url': {'lookup_field': 'uuid', 'view_name': 'deployment-preset-detail'},
         }
@@ -27,7 +26,7 @@ class DeploymentPlanItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DeploymentPlanItem
-        fields = ('preset', 'quantity', 'total_price')
+        fields = ('preset', 'quantity',)
 
 
 class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,31 +41,27 @@ class NestedDeploymentPlanItemSerializer(serializers.HyperlinkedModelSerializer)
         }
 
 
-class LazyServicesList(object):
-    def __init__(self):
-        self._items = None
+class NestedCertificatesSerializer(core_serializers.HyperlinkedRelatedModelSerializer):
+    class Meta:
+        model = structure_models.ServiceCertification
+        fields = ('url', 'uuid', 'name', 'description', 'link')
+        extra_kwargs = {
+            'url': {'lookup_field': 'uuid', 'view_name': 'service-certification-detail'},
+        }
 
-    def __iter__(self):
-        if self._items is None:
-            self._items = [service['service'] for service in SupportedServices.get_service_models().values()]
-        return iter(self._items)
 
+class BaseDeploymentPlanSerializer(core_serializers.AugmentedSerializerMixin, serializers.HyperlinkedModelSerializer):
+    certifications = NestedCertificatesSerializer(
+        many=True, queryset=structure_models.ServiceCertification.objects.all(), required=False)
 
-class BaseDeploymentPlanSerializer(AugmentedSerializerMixin,
-                                   serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.DeploymentPlan
-        fields = 'url', 'uuid', 'name', 'customer', 'items', 'service', 'total_price'
+        fields = ('url', 'uuid', 'name', 'project', 'items', 'certifications')
+        protected_fields = ('project',)
         extra_kwargs = {
-            'url': {
-                'lookup_field': 'uuid',
-                'view_name': 'deployment-plan-detail'
-            },
-            'customer': {'lookup_field': 'uuid'},
+            'url': {'lookup_field': 'uuid'},
+            'project': {'lookup_field': 'uuid'},
         }
-        protected_fields = 'customer',
-
-    service = GenericRelatedField(related_models=LazyServicesList(), required=False)
 
 
 class DeploymentPlanSerializer(BaseDeploymentPlanSerializer):
@@ -76,30 +71,30 @@ class DeploymentPlanSerializer(BaseDeploymentPlanSerializer):
 class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
     items = NestedDeploymentPlanItemSerializer(many=True, required=False)
 
-    def get_fields(self):
-        fields = super(DeploymentPlanCreateSerializer, self).get_fields()
-        fields['name'].required = False
-        return fields
-
-    def validate(self, attrs):
-        if 'service' in attrs:
-            customer = self.instance and self.instance.customer or attrs['customer']
-            service = attrs['service']
-
-            if service.customer != customer:
-                raise ValidationError('Service should belong to the same customer')
-        return attrs
+    def validate_project(self, project):
+        structure_permissions.is_administrator(self.context['request'], self.context['view'], project)
+        return project
 
     def create(self, validated_data):
         items = validated_data.pop('items', [])
+        certifications = validated_data.pop('certifications', [])
         plan = super(DeploymentPlanCreateSerializer, self).create(validated_data)
         for item in items:
             plan.items.create(**item)
+        plan.certifications.add(*certifications)
         return plan
 
     def update(self, instance, validated_data):
         items = validated_data.pop('items', None)
+        certifications = validated_data.pop('certifications', None)
+
         plan = super(DeploymentPlanCreateSerializer, self).update(instance, validated_data)
+
+        if certifications is not None:
+            with transaction.atomic():
+                plan.certifications.clear()
+                plan.certifications.add(*certifications)
+
         if items is None:
             return plan
 
@@ -122,3 +117,30 @@ class DeploymentPlanCreateSerializer(BaseDeploymentPlanSerializer):
                 plan.items.filter(preset_id=item_id).update(quantity=new_map[item_id])
 
         return plan
+
+
+class OptimizedServiceSummarySerializer(serializers.Serializer):
+    """ Serializer that renders each instance with its own specific serializer """
+
+    @classmethod
+    def get_serializer(cls, optimized_service):
+        if optimized_service.error_message:
+            return OptimizedServiceSerializer
+        return register.Register.get_serilizer(optimized_service.service.settings.type) or OptimizedServiceSerializer
+
+    def to_representation(self, instance):
+        serializer = self.get_serializer(instance)
+        return serializer(instance, context=self.context).data
+
+
+class OptimizedServiceSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=22, decimal_places=10)
+    service_settings = serializers.HyperlinkedRelatedField(
+        source='service.settings',
+        view_name='servicesettings-detail',
+        lookup_field='uuid',
+        read_only=True,
+    )
+    service_settings_name = serializers.ReadOnlyField(source='service.settings.name')
+    service_settings_type = serializers.ReadOnlyField(source='service.settings.type')
+    error_message = serializers.ReadOnlyField()

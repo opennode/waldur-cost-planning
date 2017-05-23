@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 import factory
+# XXX: Django 1.10 deprecation, import from django.urls
 from django.core.urlresolvers import reverse
 
-from nodeconductor.cost_tracking.tests.factories import DefaultPriceListItemFactory
 from nodeconductor.structure.tests import factories as structure_factories
 
 from .. import models
@@ -14,15 +14,16 @@ class DeploymentPlanFactory(factory.DjangoModelFactory):
         model = models.DeploymentPlan
 
     name = factory.Sequence(lambda n: 'plan%s' % n)
-    customer = factory.SubFactory(structure_factories.CustomerFactory)
+    project = factory.SubFactory(structure_factories.ProjectFactory)
 
     @classmethod
     def get_list_url(cls):
         return 'http://testserver' + reverse('deployment-plan-list')
 
     @classmethod
-    def get_url(cls, obj):
-        return 'http://testserver' + reverse('deployment-plan-detail', kwargs={'uuid': obj.uuid.hex})
+    def get_url(cls, obj, action=None):
+        url = 'http://testserver' + reverse('deployment-plan-detail', kwargs={'uuid': obj.uuid.hex})
+        return url if not action else url + action + '/'
 
 
 class CategoryFactory(factory.DjangoModelFactory):
@@ -44,10 +45,3 @@ class PresetFactory(factory.DjangoModelFactory):
         if obj is None:
             obj = PresetFactory()
         return 'http://testserver' + reverse('deployment-preset-detail', kwargs={'uuid': obj.uuid.hex})
-
-
-class PresetItemFactory(factory.DjangoModelFactory):
-    class Meta(object):
-        model = models.PresetItem
-
-    default_price_list_item = factory.SubFactory(DefaultPriceListItemFactory)
