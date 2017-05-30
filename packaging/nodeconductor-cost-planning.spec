@@ -1,16 +1,16 @@
 Name: nodeconductor-cost-planning
-Summary: NodeConductor cost planning plugin
+Summary: Waldur cost planning plugin
 Group: Development/Libraries
 Version: 0.3.1
 Release: 1.el7
 License: MIT
-Url: http://nodeconductor.com
+Url: http://waldur.com
 Source0: %{name}-%{version}.tar.gz
 
-Requires: nodeconductor >= 0.138.0
-Requires: nodeconductor-openstack >= 0.26.0
-Requires: nodeconductor-digitalocean >= 0.6.0
-Requires: nodeconductor-aws >= 0.7.0
+Requires: nodeconductor > 0.138.0
+Requires: nodeconductor-openstack > 0.26.0
+Requires: nodeconductor-digitalocean > 0.6.0
+Requires: nodeconductor-aws > 0.7.0
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -18,7 +18,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: python-setuptools
 
 %description
-NodeConductor cost planning plugin allows to get a price estimate without actually creating the infrastructure.
+Waldur cost planning plugin allows to get a price estimate without actually creating the infrastructure.
 
 %prep
 %setup -q -n %{name}-%{version}
