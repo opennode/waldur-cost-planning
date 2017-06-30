@@ -1,7 +1,7 @@
 Name: nodeconductor-cost-planning
 Summary: Waldur cost planning plugin
 Group: Development/Libraries
-Version: 0.4.0
+Version: 0.4.1
 Release: 1.el7
 License: MIT
 Url: http://waldur.com
@@ -37,6 +37,9 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
+* Fri Jun 30 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.1-1.el7
+- New upstream release
+
 * Wed May 31 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.0-1.el7
 - New upstream release
 
