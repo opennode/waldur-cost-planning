@@ -7,10 +7,10 @@ dev_requires = [
 ]
 
 install_requires = [
-    'nodeconductor>0.138.0',
-    'nodeconductor_openstack>0.26.0',
-    'nodeconductor_digitalocean>0.6.0',
-    'nodeconductor_aws>0.7.0',
+    'nodeconductor>=0.142.0',
+    'nodeconductor_openstack>=0.30.1',
+    'nodeconductor_digitalocean>=0.8.1',
+    'nodeconductor_aws>=0.9.1',
 ]
 
 setup(

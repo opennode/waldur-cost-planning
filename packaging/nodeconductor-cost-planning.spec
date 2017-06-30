@@ -7,10 +7,10 @@ License: MIT
 Url: http://waldur.com
 Source0: %{name}-%{version}.tar.gz
 
-Requires: waldur-core > 0.138.0
-Requires: nodeconductor-openstack > 0.26.0
-Requires: nodeconductor-digitalocean > 0.6.0
-Requires: nodeconductor-aws > 0.7.0
+Requires: waldur-core >= 0.142.0
+Requires: nodeconductor-openstack >= 0.30.1
+Requires: nodeconductor-digitalocean >= 0.8.1
+Requires: nodeconductor-aws >= 0.9.1
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
