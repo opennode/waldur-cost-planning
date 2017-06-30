@@ -21,6 +21,7 @@ setup(
     url='http://waldur.com',
     description='Waldur cost planning plugin allows to get a price estimate without actually creating the infrastructure.',
     long_description=open('README.rst').read(),
+    license='MIT',
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),
     install_requires=install_requires,
