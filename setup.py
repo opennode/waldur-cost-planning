@@ -7,20 +7,21 @@ dev_requires = [
 ]
 
 install_requires = [
-    'nodeconductor>0.138.0',
-    'nodeconductor_openstack>0.26.0',
-    'nodeconductor_digitalocean>0.6.0',
-    'nodeconductor_aws>0.7.0',
+    'nodeconductor>=0.142.0',
+    'nodeconductor_openstack>=0.30.1',
+    'nodeconductor_digitalocean>=0.8.1',
+    'nodeconductor_aws>=0.9.1',
 ]
 
 setup(
     name='nodeconductor-cost-planning',
-    version='0.4.0',
+    version='0.4.1',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://waldur.com',
     description='Waldur cost planning plugin allows to get a price estimate without actually creating the infrastructure.',
     long_description=open('README.rst').read(),
+    license='MIT',
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),
     install_requires=install_requires,
