@@ -1,4 +1,4 @@
-Welcome to NodeConductor cost planning plugin's documentation!
+Welcome to Waldur cost planning plugin's documentation!
 ==============================================================
 
 This plugin allows to get a price estimate without actually creating the infrastructure.

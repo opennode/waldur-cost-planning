@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# NodeConductor CostPlanning documentation build configuration file.
+# Waldur CostPlanning documentation build configuration file.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
