@@ -1,15 +1,15 @@
 Installation
 ------------
 
-* `Install NodeConductor <http://nodeconductor.readthedocs.org/en/latest/guide/intro.html#installation-from-source>`_
+* `Install Waldur <http://nodeconductor.readthedocs.org/en/latest/guide/intro.html#installation-from-source>`_
 
-* Clone NodeConductor CostPlanning repository
+* Clone Waldur CostPlanning repository
 
   .. code-block:: bash
 
     git clone https://github.com/opennode/nodeconductor-cost-planning.git
 
-* Install NodeConductor cost planning plugin into NodeConductor virtual environment
+* Install Waldur cost planning plugin into Waldur virtual environment
 
   .. code-block:: bash
 

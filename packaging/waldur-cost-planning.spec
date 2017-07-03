@@ -1,16 +1,18 @@
-Name: nodeconductor-cost-planning
+Name: waldur-cost-planning
 Summary: Waldur cost planning plugin
 Group: Development/Libraries
-Version: 0.4.1
+Version: 0.4.2
 Release: 1.el7
 License: MIT
 Url: http://waldur.com
 Source0: %{name}-%{version}.tar.gz
 
 Requires: waldur-core >= 0.142.0
-Requires: nodeconductor-openstack >= 0.30.1
-Requires: nodeconductor-digitalocean >= 0.8.1
-Requires: nodeconductor-aws >= 0.9.1
+Requires: waldur-openstack >= 0.30.2
+Requires: waldur-digitalocean >= 0.8.2
+Requires: waldur-aws >= 0.9.2
+
+Obsoletes: nodeconductor-cost-planning
 
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -37,6 +39,9 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
+* Mon Jul 3 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.2-1.el7
+- New upstream release
+
 * Fri Jun 30 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.1-1.el7
 - New upstream release
 
