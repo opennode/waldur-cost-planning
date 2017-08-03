@@ -26,36 +26,19 @@ Waldur cost planning plugin allows to get a price estimate without actually crea
 %setup -q -n %{name}-%{version}
 
 %build
-python setup.py build
+%{__python} setup.py build
 
 %install
 rm -rf %{buildroot}
-python setup.py install --single-version-externally-managed -O1 --root=%{buildroot} --record=INSTALLED_FILES
+%{__python} setup.py install -O1 --root=%{buildroot}
 
 %clean
 rm -rf %{buildroot}
 
-%files -f INSTALLED_FILES
+%files
 %defattr(-,root,root)
+%{python_sitelib}/*
 
 %changelog
 * Mon Jul 3 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.2-1.el7
 - New upstream release
-
-* Fri Jun 30 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.1-1.el7
-- New upstream release
-
-* Wed May 31 2017 Jenkins <jenkins@opennodecloud.com> - 0.4.0-1.el7
-- New upstream release
-
-* Tue May 23 2017 Jenkins <jenkins@opennodecloud.com> - 0.3.1-1.el7
-- New upstream release
-
-* Tue May 23 2017 Jenkins <jenkins@opennodecloud.com> - 0.3.0-1.el7
-- New upstream release
-
-* Sat Sep 17 2016 Jenkins <jenkins@opennodecloud.com> - 0.2.0-1.el7
-- New upstream release
-
-* Tue May 3 2016 Victor Mireyev <victor@opennodecloud.com> - 0.1.0-1.el7
-- Initial version of the package
