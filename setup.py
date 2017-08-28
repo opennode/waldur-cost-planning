@@ -11,6 +11,7 @@ install_requires = [
     'nodeconductor_openstack>=0.30.2',
     'nodeconductor_digitalocean>=0.8.2',
     'nodeconductor_aws>=0.9.2',
+    'nodeconductor_azure>=0.3.0',
 ]
 
 setup(
