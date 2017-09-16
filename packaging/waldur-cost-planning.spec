@@ -11,7 +11,7 @@ Requires: waldur-core >= 0.142.0
 Requires: waldur-openstack >= 0.30.2
 Requires: waldur-digitalocean >= 0.8.2
 Requires: waldur-aws >= 0.9.2
-Requires: nodeconductor-azure >= 0.3.0
+Requires: waldur-azure >= 0.3.0
 
 Obsoletes: nodeconductor-cost-planning
 
