@@ -17,4 +17,4 @@ deploy:
   on:
     tags: true
     distributions: sdist bdist_wheel
-    repo: opennode/nodeconductor-cost-planning
+    repo: opennode/waldur-cost-planning
