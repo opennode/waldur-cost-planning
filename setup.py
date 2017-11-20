@@ -16,7 +16,7 @@ install_requires = [
 
 setup(
     name='nodeconductor-cost-planning',
-    version='0.5.3',
+    version='0.5.4',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://waldur.com',
