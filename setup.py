@@ -8,7 +8,7 @@ dev_requires = [
 
 install_requires = [
     'nodeconductor>=0.142.0',
-    'nodeconductor_openstack>=0.30.2',
+    'waldur_openstack>=0.30.2',
     'nodeconductor_digitalocean>=0.8.2',
     'nodeconductor_aws>=0.9.2',
     'nodeconductor_azure>=0.3.0',
