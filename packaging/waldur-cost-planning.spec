@@ -1,7 +1,7 @@
 Name: waldur-cost-planning
 Summary: Waldur cost planning plugin
 Group: Development/Libraries
-Version: 0.5.3
+Version: 0.5.4
 Release: 1.el7
 License: MIT
 Url: http://waldur.com
@@ -41,6 +41,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/*
 
 %changelog
+* Mon Nov 20 2017 Jenkins <jenkins@opennodecloud.com> - 0.5.4-1.el7
+- New upstream release
+
 * Fri Nov 17 2017 Jenkins <jenkins@opennodecloud.com> - 0.5.3-1.el7
 - New upstream release
 
