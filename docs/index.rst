@@ -41,7 +41,7 @@ Endpoints
 License
 -------
 
-NodeConductor cost planning plugin is open-source under MIT license.
+Waldur cost planning plugin is open-source under MIT license.
 
 
 Indices and tables

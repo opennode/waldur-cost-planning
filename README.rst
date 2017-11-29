@@ -1,5 +1,4 @@
-NodeConductor cost planning plugin
-==================================
+Waldur cost planning plugin
+===========================
 
-NodeConductor cost planning plugin allows to get a price estimate without actually creating the infrastructure.
-
+Waldur cost planning plugin allows to get a price estimate without actually creating the infrastructure.
