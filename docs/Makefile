@@ -85,17 +85,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/nodeconductor-cost-planning.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/waldur-cost-planning.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/nodeconductor-cost-planning.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/waldur-cost-planning.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/nodeconductor-cost-planning"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/nodeconductor-cost-planning"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/waldur-cost-planning"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/waldur-cost-planning"
 	@echo "# devhelp"
 
 epub:
