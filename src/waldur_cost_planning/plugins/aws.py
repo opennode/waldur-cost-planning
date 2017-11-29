@@ -3,7 +3,7 @@ import collections
 
 from rest_framework import serializers as rf_serializers
 
-from nodeconductor_aws import (
+from waldur_aws import (
     apps as aws_apps, models as aws_models, serializers as aws_serializers, cost_tracking as aws_cost_tracking)
 
 from .. import optimizers, register, serializers
