@@ -4,7 +4,7 @@ import collections
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers as rf_serializers
 
-from nodeconductor.cost_tracking import models as cost_tracking_models
+from waldur_core.cost_tracking import models as cost_tracking_models
 from waldur_openstack.openstack_tenant import (
     apps as ot_apps, models as ot_models, serializers as ot_serializers, cost_tracking as ot_cost_tracking)
 

@@ -1,8 +1,8 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, decorators, response, status
 
-from nodeconductor.core import views as core_views
-from nodeconductor.structure import filters as structure_filters, permissions as structure_permissions
+from waldur_core.core import views as core_views
+from waldur_core.structure import filters as structure_filters, permissions as structure_permissions
 
 from . import models, serializers, filters, optimizers
 

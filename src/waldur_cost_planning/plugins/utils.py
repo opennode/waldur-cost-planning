@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 
-from nodeconductor.cost_tracking import models as cost_tracking_models
+from waldur_core.cost_tracking import models as cost_tracking_models
 
 
 def get_service_price_list_items(service, resource_model):
