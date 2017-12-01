@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import factory
 from django.urls import reverse
 
-from nodeconductor.structure.tests import factories as structure_factories
+from waldur_core.structure.tests import factories as structure_factories
 
 from .. import models
 

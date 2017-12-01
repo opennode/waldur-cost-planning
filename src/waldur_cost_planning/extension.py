@@ -1,7 +1,7 @@
-from nodeconductor.core import NodeConductorExtension
+from waldur_core.core import WaldurExtension
 
 
-class CostPlanningExtension(NodeConductorExtension):
+class CostPlanningExtension(WaldurExtension):
     class Settings:
         WALDUR_COST_PLANNING = {
             'currency': 'USD',
