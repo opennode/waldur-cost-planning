@@ -7,16 +7,16 @@ dev_requires = [
 ]
 
 install_requires = [
-    'nodeconductor>=0.142.0',
-    'waldur_openstack>=0.30.2',
-    'waldur_digitalocean>=0.8.2',
-    'waldur_aws>=0.9.2',
-    'waldur_azure>=0.3.0',
+    'waldur-core>=0.151.0',
+    'waldur_openstack>=0.38.2',
+    'waldur_digitalocean>=0.10.2',
+    'waldur_aws>=0.11.2',
+    'waldur_azure>=0.3.4',
 ]
 
 setup(
     name='waldur-cost-planning',
-    version='0.5.5',
+    version='0.5.6',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://waldur.com',
@@ -31,7 +31,7 @@ setup(
         'dev': dev_requires,
     },
     entry_points={
-        'nodeconductor_extensions': (
+        'waldur_extensions': (
             'waldur_cost_planning = waldur_cost_planning.extension:CostPlanningExtension',
         ),
     },

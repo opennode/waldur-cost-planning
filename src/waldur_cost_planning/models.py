@@ -8,8 +8,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.lru_cache import lru_cache
 from model_utils.models import TimeStampedModel
 
-from nodeconductor.core import models as core_models
-from nodeconductor.structure import SupportedServices, models as structure_models
+from waldur_core.core import models as core_models
+from waldur_core.structure import SupportedServices, models as structure_models
 
 
 logger = logging.getLogger(__name__)

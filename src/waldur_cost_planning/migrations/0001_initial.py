@@ -6,8 +6,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
-import nodeconductor.core.fields
-import nodeconductor.core.validators
+import waldur_core.core.fields
+import waldur_core.core.validators
 
 
 class Migration(migrations.Migration):
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
             name='Category',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, validators=[nodeconductor.core.validators.validate_name], verbose_name='name')),
+                ('name', models.CharField(max_length=150, validators=[waldur_core.core.validators.validate_name], verbose_name='name')),
             ],
             options={
                 'verbose_name_plural': 'Categories',
@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('name', models.CharField(max_length=150, validators=[nodeconductor.core.validators.validate_name], verbose_name='name')),
-                ('uuid', nodeconductor.core.fields.UUIDField()),
+                ('name', models.CharField(max_length=150, validators=[waldur_core.core.validators.validate_name], verbose_name='name')),
+                ('uuid', waldur_core.core.fields.UUIDField()),
                 ('certifications', models.ManyToManyField(blank=True, to='structure.ServiceCertification')),
                 ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='structure.Project')),
             ],
@@ -59,8 +59,8 @@ class Migration(migrations.Migration):
             name='Preset',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, validators=[nodeconductor.core.validators.validate_name], verbose_name='name')),
-                ('uuid', nodeconductor.core.fields.UUIDField()),
+                ('name', models.CharField(max_length=150, validators=[waldur_core.core.validators.validate_name], verbose_name='name')),
+                ('uuid', waldur_core.core.fields.UUIDField()),
                 ('variant', models.CharField(choices=[('small', 'Small'), ('medium', 'Medium'), ('large', 'Large')], max_length=150)),
                 ('ram', models.PositiveIntegerField(default=0, help_text='Preset ram amount in MB.')),
                 ('cores', models.PositiveIntegerField(default=0, help_text='Preset cores count.')),

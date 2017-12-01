@@ -1,7 +1,7 @@
 """ This module calculates the cheapest price for deployment plans. """
 import collections
 
-from nodeconductor.structure import models as structure_models
+from waldur_core.structure import models as structure_models
 
 from . import register
 

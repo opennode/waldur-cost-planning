@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.db import transaction
 from rest_framework import serializers
 
-from nodeconductor.core import serializers as core_serializers
-from nodeconductor.structure import permissions as structure_permissions, models as structure_models
+from waldur_core.core import serializers as core_serializers
+from waldur_core.structure import permissions as structure_permissions, models as structure_models
 
 from . import models, register
 
