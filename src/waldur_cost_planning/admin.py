@@ -21,14 +21,14 @@ class PresetAdmin(admin.ModelAdmin):
     def ram_gb(self, obj):
         return '%s GB' % core_admin.GBtoMBWidget().format_value(obj.ram)
 
-    ram_gb.admin_order_field = _('ram')
+    ram_gb.admin_order_field = 'ram'
     ram_gb.short_description = _('RAM')
 
     def storage_gb(self, obj):
         return '%s GB' % core_admin.GBtoMBWidget().format_value(obj.storage)
 
     storage_gb.admin_order_field = 'storage'
-    storage_gb.short_description = 'Storage'
+    storage_gb.short_description = _('Storage')
 
     form = PresetAdminForm
     base_model = models.Preset
