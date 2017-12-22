@@ -62,9 +62,9 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=150, validators=[waldur_core.core.validators.validate_name], verbose_name='name')),
                 ('uuid', waldur_core.core.fields.UUIDField()),
                 ('variant', models.CharField(choices=[('small', 'Small'), ('medium', 'Medium'), ('large', 'Large')], max_length=150)),
-                ('ram', models.PositiveIntegerField(default=0, help_text='Preset ram amount in MB.')),
+                ('ram', models.PositiveIntegerField(default=0)),
                 ('cores', models.PositiveIntegerField(default=0, help_text='Preset cores count.')),
-                ('storage', models.PositiveIntegerField(default=0, help_text='Preset storage amount in MB.')),
+                ('storage', models.PositiveIntegerField(default=0)),
                 ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='presets', to='waldur_cost_planning.Category')),
             ],
             options={
