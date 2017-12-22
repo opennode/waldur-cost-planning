@@ -7,7 +7,7 @@ dev_requires = [
 ]
 
 install_requires = [
-    'waldur-core>=0.151.0',
+    'waldur-core>=0.151.1',
     'waldur_openstack>=0.38.2',
     'waldur_digitalocean>=0.10.2',
     'waldur_aws>=0.11.2',
