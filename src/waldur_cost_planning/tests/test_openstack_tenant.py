@@ -1,6 +1,9 @@
 from ddt import ddt, data
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import status, test
 
+from waldur_core.cost_tracking.tests import factories as ct_factories
+from waldur_openstack.openstack_tenant import models as ot_models, cost_tracking as ot_cost_tracking
 from waldur_openstack.openstack_tenant.tests import factories as ot_factories
 
 from . import factories, fixtures
@@ -12,7 +15,8 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
         self.fixture = fixtures.CostPlanningOpenStackPluginFixture()
         self.plan = self.fixture.deployment_plan
         self.url = factories.DeploymentPlanFactory.get_url(self.plan, action='evaluate')
-        self.settings = self.fixture.spl.service.settings
+        self.service = self.fixture.spl.service
+        self.settings = self.service.settings
         self.flavor_params = [
             {'cores': 1, 'ram': 1 * 1024, 'name': 'flavor-1'},
             {'cores': 2, 'ram': 2 * 1024, 'name': 'flavor-2'},
@@ -22,6 +26,16 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
 
         for p in self.flavor_params:
             ot_factories.FlavorFactory(settings=self.settings, **p)
+            ct_factories.DefaultPriceListItemFactory(
+                resource_content_type=ContentType.objects.get_for_model(ot_models.Instance),
+                item_type='flavor',
+                key=p['name'])
+
+        ct_factories.DefaultPriceListItemFactory(
+            resource_content_type=ContentType.objects.get_for_model(ot_models.Volume),
+            item_type=ot_cost_tracking.VolumeStrategy.Types.STORAGE,
+            key=ot_cost_tracking.VolumeStrategy.Keys.STORAGE,
+        )
 
     @data(
         {'variant': 'small', 'cores': 2, 'ram': 1 * 1024},
@@ -33,7 +47,8 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
         data = response.json()
         optimal_flavor = filter(lambda x: x['cores'] >= preset_param['cores'] and x['ram'] >= preset_param['ram'],
                                 self.flavor_params)[0]['name']
-        self.assertTrue(optimal_flavor in data[0]['error_message'])
+        self.assertFalse(data[0]['error_message'])
+        self.assertEqual(optimal_flavor, data[0]['optimized_presets'][0]['flavor']['name'])
 
     @data(
         {'variant': 'large', 'cores': 8, 'ram': 4 * 1024},
@@ -42,6 +57,7 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
         response = self._get_response(preset_param)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
+        self.assertTrue(data[0]['error_message'])
         self.assertTrue('It is too big' in data[0]['error_message'])
 
     def _get_response(self, preset_param):
