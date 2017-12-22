@@ -25,7 +25,7 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
 
     @data(
         {'variant': 'small', 'cores': 2, 'ram': 1 * 1024},
-        {'variant': 'small', 'cores': 1, 'ram': 4 * 1024},
+        {'variant': 'medium', 'cores': 2, 'ram': 4 * 1024},
     )
     def test_filter_flavors_if_exist_any_meet_plan_requirements(self, preset_param):
         response = self._get_response(preset_param)
@@ -36,7 +36,7 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
         self.assertTrue(optimal_flavor in data[0]['error_message'])
 
     @data(
-        {'variant': 'small', 'cores': 8, 'ram': 4 * 1024},
+        {'variant': 'large', 'cores': 8, 'ram': 4 * 1024},
     )
     def test_filter_flavors_if_not_exist_any_meet_plan_requirements(self, preset_param):
         response = self._get_response(preset_param)
