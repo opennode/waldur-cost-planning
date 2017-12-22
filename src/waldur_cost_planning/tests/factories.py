@@ -44,3 +44,12 @@ class PresetFactory(factory.DjangoModelFactory):
         if obj is None:
             obj = PresetFactory()
         return 'http://testserver' + reverse('deployment-preset-detail', kwargs={'uuid': obj.uuid.hex})
+
+
+class DeploymentPlanItemFactory(factory.DjangoModelFactory):
+    class Meta(object):
+        model = models.DeploymentPlanItem
+
+    plan = factory.SubFactory(DeploymentPlanFactory)
+    preset = factory.SubFactory(PresetFactory)
+    quantity = 1
