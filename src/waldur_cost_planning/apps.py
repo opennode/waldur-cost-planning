@@ -6,4 +6,4 @@ class CostPlanningConfig(AppConfig):
     verbose_name = 'Cost planning'
 
     def ready(self):
-        from .plugins import digitalocean, openstack_tenant, aws, azure
+        from .plugins import digitalocean, openstack_tenant, aws, azure  # noqa: F401
