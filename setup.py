@@ -16,7 +16,7 @@ install_requires = [
 
 setup(
     name='waldur-cost-planning',
-    version='0.6.1',
+    version='0.6.2',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://waldur.com',
