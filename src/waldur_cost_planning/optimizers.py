@@ -55,6 +55,7 @@ class SingleServiceStrategy(Strategy):
     """ Optimize deployment plan for each service separately and return list
         of all available variants.
     """
+
     def _get_optimized_service(self, service):
         optimizer_class = register.Register.get_optimizer(service.settings.type)
         if optimizer_class:
@@ -83,6 +84,7 @@ class Optimizer(object):
     """ Abstract. Descendant should define how to get the cheapest setup for a
         particular service.
     """
+
     def optimize(self, deployment_plan, service):
         """ Return the cheapest setup as OptimizedService object """
         raise NotImplementedError()

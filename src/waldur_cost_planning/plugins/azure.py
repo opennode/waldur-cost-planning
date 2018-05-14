@@ -4,7 +4,7 @@ import collections
 from rest_framework import serializers as rf_serializers
 
 from waldur_azure import (apps as azure_apps, models as azure_models, serializers as azure_serializers,
-                                 cost_tracking as azure_cost_tracking, backend as azure_backend)
+                          cost_tracking as azure_cost_tracking, backend as azure_backend)
 
 from .. import optimizers, register, serializers
 from . import utils
