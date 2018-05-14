@@ -2,6 +2,7 @@ from ddt import ddt, data
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status, test
 
+from waldur_core.cost_tracking import models as ct_models
 from waldur_core.cost_tracking.tests import factories as ct_factories
 from waldur_openstack.openstack_tenant import models as ot_models, cost_tracking as ot_cost_tracking
 from waldur_openstack.openstack_tenant.tests import factories as ot_factories
@@ -26,7 +27,7 @@ class OpenStackTenantOptimizerTest(test.APITransactionTestCase):
 
         for p in self.flavor_params:
             ot_factories.FlavorFactory(settings=self.settings, **p)
-            ct_factories.DefaultPriceListItemFactory(
+            ct_models.DefaultPriceListItem.objects.update_or_create(
                 resource_content_type=ContentType.objects.get_for_model(ot_models.Instance),
                 item_type='flavor',
                 key=p['name'])
