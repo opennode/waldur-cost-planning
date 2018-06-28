@@ -16,5 +16,5 @@ deploy:
     secure: hevkop1pc02Dnr39zuwzcCWQ0Fc4XfldeRShVRQvVa91qpLAedMU54fZOJZN+vwzVJWC/xwmz57aMoK9M0+NKcx5WartlbRXd3bdA1ej2ng/xg1xGb5z+7cHLjJDtd+UlkIHtBxExqXeB3sQoW2otT6pxhldzsETCYn5ehqHZXtML3sU4Jh/behm+/DA/3nDziVSFkyINAzZu175ME0+a4DDewp6dO9TiStSbtLdwe4GdcwsiBtXxoVFZ+MEZXMoxyWLQa9RSmlQZMwDEW2gitgbrKGTTOx9Z/+0cTj+8+DJ+waWs6SrSA0vqR9xPVcyfbNUXmw/UEojyIbi59RTJAt2KGtO8ymj+htQg4A5LN2pflVr0rXx1J2uH14i1Z9MskkOa0eLU0i9uqdxmo3hm9ZczNkojGt0z1urju0RmhvRQqSQIRCgD/UriPCiuDDXlGvyUKqa38t+8qnUrB3IsNTWbhxe7hQa3T3mYYdnkWfyt4CueJdpUKyRSKFDWlNPAkppTEpCnGQ8//dsgcYGhIvV3BsU8JIsXtnss5gSCb37GLA1Zrv1i0grdXNz/QawMbn8/I9YOpxkRPWO1RofUC8zzxhmybIPGEfTgarSMS2F9ztdvsdJV6KDhJ+hfmTExF76517ZbhdzHeaEqirNvFwsB7AQwjZTUktBdVS2BF4=
   on:
     tags: true
-    distributions: sdist bdist_wheel
     repo: opennode/waldur-cost-planning
+  distributions: "sdist bdist_wheel"
